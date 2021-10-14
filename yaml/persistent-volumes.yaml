@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: labtools-volume
+spec:
+  storageClassName: macos 
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 30Gi
+  hostPath:
+    path: /labtools-k8s
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-volume
+spec:
+  storageClassName: host 
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 60Gi
+  hostPath:
+    path: /data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: default-volume
+spec:
+  storageClassName: default 
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 80Gi
+  hostPath:
+    path: /data/default
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+    name: direct-csi-min-io
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
