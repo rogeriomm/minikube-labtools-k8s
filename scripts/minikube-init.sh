@@ -32,10 +32,10 @@ create_cluster2()
   minikube -p $PROFILE addons enable ingress
   minikube -p $PROFILE addons enable ingress-dns
   minikube -p $PROFILE addons disable registry
-  minikube -p $PROFILE addons enable registry-aliases
+  minikube -p $PROFILE addons disable registry-aliases
   minikube -p $PROFILE addons enable dashboard
   minikube -p $PROFILE addons enable metrics-server
-  minikube -p $PROFILE addons enable registry-creds
+  minikube -p $PROFILE addons disable registry-creds
 
   minikube -p $PROFILE addons list
 }
