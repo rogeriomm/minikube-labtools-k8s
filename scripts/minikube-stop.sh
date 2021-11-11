@@ -3,5 +3,5 @@
 minikube -p cluster stop 
 minikube -p cluster2 stop 
 
-rm ~/.minikube/docker-env
+rm -f ~/.minikube/docker-env
 
