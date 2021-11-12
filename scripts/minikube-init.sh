@@ -106,3 +106,5 @@ kubectx cluster2
 # Setup Argocd
 argocd_setup
 argocd_show_password
+
+sudo python3 minikube-init.py
