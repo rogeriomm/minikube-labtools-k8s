@@ -103,6 +103,8 @@ internal_registry_setup
 minikube profile cluster2
 kubectx cluster2
 
+kubectl apply -f persistent-volumes.yaml
+
 # Setup Argocd
 argocd_setup
 argocd_show_password
