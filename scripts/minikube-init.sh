@@ -74,7 +74,7 @@ internal_registry_setup()
 
 are_you_sure()
 {
-  read -q "REPLY?Initialize Minikube?"
+  read -q "REPLY? Initialize Minikube(y/n)? "
   echo "\n"
 
   if [ "$REPLY" = "n" ]; then
@@ -82,31 +82,54 @@ are_you_sure()
   fi
 }
 
-are_you_sure
+init()
+{
+  echo "Installation..."
+  set -x
 
-set -x
+  # Delete all clusters
+  minikube -p cluster delete
+  minikube -p cluster2 delete
 
-# Delete all clusters
-minikube -p cluster delete
-minikube -p cluster2 delete
+  # Create cluster with 1 node
+  cluster1_create
 
-# Create cluster with 1 node
-cluster1_create
+  # Create cluster with 2 nodes
+  cluster2_create
 
-# Create cluster with 2 nodes
-cluster2_create
+  # Setup internal registry
+  internal_registry_setup
 
-# Setup internal registry
-internal_registry_setup
+  # Set current minikube profile
+  minikube profile cluster2
+  kubectx cluster2
 
-# Set current minikube profile
-minikube profile cluster2
-kubectx cluster2
+  kubectl apply -f persistent-volumes.yaml
 
-kubectl apply -f persistent-volumes.yaml
+  # Setup Argocd
+  argocd_setup
+  argocd_show_password
 
-# Setup Argocd
-argocd_setup
-argocd_show_password
+  sudo python3 minikube-init.py
+}
 
-sudo python3 minikube-init.py
+# //192.168.0.201/share /share cifs  credentials=/home/docker/.smbcredentials 0 0
+# sudo mount.cifs "\\\\192.168.0.201\share" -o user=rogermm,pass=password /data/share
+post_init()
+{
+  echo "Post installation..."
+  set -x
+  sudo python3 minikube-init.py
+}
+
+if [[ "$1" = "install" ]]; then
+  are_you_sure
+  sudo echo
+  init
+  post_init
+elif [[ "$1" = "postinstall" ]]; then
+  sudo echo
+  post_init
+else
+  echo "Invalid command"
+fi

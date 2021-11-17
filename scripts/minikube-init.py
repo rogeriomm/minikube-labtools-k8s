@@ -2,17 +2,41 @@ import os
 import sys
 from python_hosts import Hosts, HostsEntry
 import ipaddress
+from rich.traceback import install
+from rich.console import Console
+from rich.theme import Theme
+
+def minikube_cmd(node: str, cmd: str, profile=None, is_print=False):
+    if profile is None:
+        s = f"minikube --node={node} {cmd}"
+    else:
+        s = f"minikube -p {profile} --node={node} {cmd}"
+    stream = os.popen(s)
+    ret = stream.read()
+    if is_print:
+        print(ret, end='')
+    return ret
 
 
-def get_minikube_ip(profile: str) -> str:
-    stream = os.popen(f"minikube -p {profile} ip")
-    m_ip = stream.read()
+def minikube_get_ip(node: str, profile=None) -> str:
+    m_ip = minikube_cmd(node, "ip", profile)
     m_ip = m_ip.rstrip()
     try:
-        ip = ipaddress.ip_address(m_ip)
+        ipaddress.ip_address(m_ip)
     except:
         m_ip = None
     return m_ip
+
+
+def minikube_get_sshkey(node: str, profile=None) -> str:
+    key = minikube_cmd(node, "ssh-key", profile)
+    key = key.strip()
+    return key
+
+
+def minikube_set_profile(profile: str):
+    stream = os.popen(f"minikube profile {profile}")
+    print(stream.read(), end='')
 
 
 def update_host(ip: str, address: str) -> bool:
@@ -27,18 +51,51 @@ def update_host(ip: str, address: str) -> bool:
     return True
 
 
-def main():
-    minikube_ip = get_minikube_ip("cluster")
-    minikube_ip2 = get_minikube_ip("cluster2")
+def scp(ip: str, ssh_key: str, file: str):
+    cmd = f"scp -o \"StrictHostKeyChecking no\"  -i {ssh_key} {file} docker@{ip}: 2> /dev/null"
+    stream = os.popen(cmd)
+    k = stream.read()
+    print(k, end='')
 
-    if minikube_ip is None or minikube_ip2 is None:
-        print("Minikube instalation failed")
+
+def cluster2_run(cmd: str):
+    minikube_cmd("cluster2-m02", cmd, "cluster2", is_print=True)
+    minikube_cmd("cluster2", cmd, "cluster2", is_print=True)
+
+
+def main():
+    # Install Rich
+    install()
+
+    custom_theme = Theme({"success": "green", "error": "bold red"})
+    console = Console(theme=custom_theme)
+
+    minikube_set_profile("cluster2")
+    minikube_ip1 = minikube_get_ip("cluster2")
+    minikube_ip2 = minikube_get_ip("cluster2-m02")
+    sshkey1 = minikube_get_sshkey("cluster2")
+    sshkey2 = minikube_get_sshkey("cluster2-m02")
+
+    if minikube_ip1 is None or \
+       minikube_ip2 is None or \
+       sshkey1 is None or \
+       sshkey2 is None:
+        print("Minikube installation failed: invalid minikube ip/ssh-key")
         return
+
+    # Copy initialization script to minikube nodes
+    scp(minikube_ip1, sshkey1, "init.sh")
+    scp(minikube_ip2, sshkey2, "init.sh")
+    minikube_cmd("cluster2", "ssh \"chmod +x init.sh\"")
+    minikube_cmd("cluster2-m02", "ssh \"chmod +x init.sh\"")
 
     if not update_host(minikube_ip2, 'argocd.world.xpt'):
-        print("Minikube instalation failed")
+        print("Minikube installation failed: update hosts")
         return
 
+    # Execute initialization script on minikube nodes
+    minikube_cmd("cluster2",     "ssh \"sudo ./init.sh\"", is_print=True)
+    minikube_cmd("cluster2-m02", "ssh \"sudo ./init.sh\"", is_print=True)
 
 if __name__ == "__main__":
     main()
