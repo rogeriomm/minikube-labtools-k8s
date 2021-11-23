@@ -46,11 +46,11 @@ def minikube_set_profile(profile: str):
     print(stream.read(), end='')
 
 
-def update_host(ip: str, address: str) -> bool:
+def update_host(ip: str, address: []) -> bool:
     shutil.copyfile("/etc/hosts", "/tmp/hosts")
     hosts = Hosts(path="/tmp/hosts")
     hosts.remove_all_matching(name=address)
-    argocd_entry = HostsEntry(entry_type='ipv4', address=ip, names=[address])
+    argocd_entry = HostsEntry(entry_type='ipv4', address=ip, names=address)
     hosts.add([argocd_entry], force=True)
     hosts.write()
     os.system("sudo echo -n")
@@ -105,7 +105,7 @@ def main():
     console.print(f"Ingress node: {ingress_node}")
     minikube_ip_ingress = minikube_get_ip(ingress_node)
 
-    if not update_host(minikube_ip_ingress, 'argocd.world.xpt'):
+    if not update_host(minikube_ip_ingress, ['argocd.world.xpt', 'rancher.world.xpt']):
         console.print("Minikube installation failed: update hosts", style="error")
         return
 

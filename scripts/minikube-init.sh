@@ -3,6 +3,8 @@
 # https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
 # brew install docker-credential-helper
 
+KUBERNETES_VERSION="1.21.6"
+
 cluster1_create()
 {
   PROFILE=cluster
@@ -12,7 +14,8 @@ cluster1_create()
   minikube -p $PROFILE config set disk-size 100g
   minikube -p $PROFILE config view
 
-  minikube -p $PROFILE start --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
+  minikube -p $PROFILE start --kubernetes-version="v${KUBERNETES_VERSION}" \
+           --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
   minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
 
@@ -28,7 +31,8 @@ cluster2_create()
   minikube -p $PROFILE config set disk-size 100g
   minikube -p $PROFILE config view
 
-  minikube -p $PROFILE start --nodes 2 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
+  minikube -p $PROFILE start --kubernetes-version="v${KUBERNETES_VERSION}" \
+           --nodes 2 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
   minikube -p $PROFILE addons enable ingress
   minikube -p $PROFILE addons enable ingress-dns
@@ -76,10 +80,30 @@ internal_registry_setup()
   kubectl -n kube-system apply -f node-etc-hosts-update.yaml
 }
 
+# https://rancher.com/docs/rancher/v2.5/en/installation/install-rancher-on-k8s/
+rancher_setup()
+{
+  helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+  helm repo update
+  kubectl create namespace cattle-system
+  helm install rancher rancher-stable/rancher \
+     --namespace cattle-system \
+     --set hostname=rancher.world.xpt \
+     --set replicas=2 \
+     --set ingress.tls.source=secret
+}
+
+rancher_show_password()
+{
+  echo "Rancher password: " -n
+  kubectl get secret --namespace cattle-system bootstrap-secret \
+     -o go-template='{{.data.bootstrapPassword|base64decode}}{{"\n"}}'
+}
+
 copy_cert()
 {
-  mkdir -p "$MINIKUBE_HOME"/.minikube/certs
-  cp world.xpt.pem "$MINIKUBE_HOME"/.minikube/certs
+  mkdir -p "$MINIKUBE_HOME"/certs
+  cp world.xpt.pem "$MINIKUBE_HOME"/certs
 }
 
 are_you_sure()
@@ -135,8 +159,10 @@ post_init()
 {
   echo "Post installation..."
   set -x
+  rancher_setup
   python3 minikube-init.py
   argocd_show_password
+  rancher_show_password
 }
 
 if [[ "$1" = "install" ]]; then
