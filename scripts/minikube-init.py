@@ -1,10 +1,11 @@
 import os
-import sys
+import shutil
 from python_hosts import Hosts, HostsEntry
 import ipaddress
 from rich.traceback import install
 from rich.console import Console
 from rich.theme import Theme
+
 
 def minikube_cmd(node: str, cmd: str, profile=None, is_print=False):
     if profile is None:
@@ -39,20 +40,21 @@ def minikube_get_ingress_node() -> str:
     stream = os.popen(cmd)
     return stream.read()
 
+
 def minikube_set_profile(profile: str):
     stream = os.popen(f"minikube profile {profile}")
     print(stream.read(), end='')
 
 
 def update_host(ip: str, address: str) -> bool:
-    hosts = Hosts()
+    shutil.copyfile("/etc/hosts", "/tmp/hosts")
+    hosts = Hosts(path="/tmp/hosts")
     hosts.remove_all_matching(name=address)
     argocd_entry = HostsEntry(entry_type='ipv4', address=ip, names=[address])
     hosts.add([argocd_entry], force=True)
-    try:
-        hosts.write()
-    except:
-        return False
+    hosts.write()
+    os.system("sudo echo -n")
+    os.system("sudo cp /tmp/hosts /etc/hosts")
     return True
 
 
@@ -86,9 +88,9 @@ def main():
     console.print(f"Minikube cluster2 ip: {minikube_ip1} {minikube_ip2}")
 
     if minikube_ip1 is None or \
-       minikube_ip2 is None or \
-       sshkey1 is None or \
-       sshkey2 is None:
+            minikube_ip2 is None or \
+            sshkey1 is None or \
+            sshkey2 is None:
         console.print("Minikube installation failed: invalid minikube ip/ssh-key", style="error")
         return
 
@@ -108,7 +110,7 @@ def main():
         return
 
     # Execute initialization script on minikube nodes
-    minikube_cmd("cluster2",     "ssh \"sudo ./init.sh\"", is_print=True)
+    minikube_cmd("cluster2", "ssh \"sudo ./init.sh\"", is_print=True)
     minikube_cmd("cluster2-m02", "ssh \"sudo ./init.sh\"", is_print=True)
 
 
