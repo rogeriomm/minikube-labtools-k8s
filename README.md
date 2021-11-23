@@ -16,6 +16,7 @@
       * https://argocd.world.xpt
 
 # Rancher
+   * https://rancher.world.xpt
 
 ## References
    * https://argo-cd.readthedocs.io/en/stable/getting_started/
