@@ -99,9 +99,11 @@ rancher_setup()
 
 rancher_show_password()
 {
+  set +x
   echo -n "Rancher password: "
   kubectl get secret --namespace cattle-system bootstrap-secret \
      -o go-template='{{.data.bootstrapPassword|base64decode}}{{"\n"}}'
+  set -x
 }
 
 copy_cert()
