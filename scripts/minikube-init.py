@@ -70,7 +70,7 @@ def cluster2_run(cmd: str):
     minikube_cmd("cluster2", cmd, "cluster2", is_print=True)
 
 
-def main():
+def main() -> int:
     # Install Rich
     install()
 
@@ -92,13 +92,14 @@ def main():
             sshkey1 is None or \
             sshkey2 is None:
         console.print("Minikube installation failed: invalid minikube ip/ssh-key", style="error")
-        return
+        return 1
 
-    # Copy initialization script to minikube nodes
-    scp(minikube_ip1, sshkey1, "init.sh")
-    scp(minikube_ip2, sshkey2, "init.sh")
-    minikube_cmd("cluster2", "ssh \"chmod +x init.sh\"")
-    minikube_cmd("cluster2-m02", "ssh \"chmod +x init.sh\"")
+    if os.path.isfile("init.sh"):
+        # Copy initialization script to minikube nodes
+        scp(minikube_ip1, sshkey1, "init.sh")
+        scp(minikube_ip2, sshkey2, "init.sh")
+        minikube_cmd("cluster2", "ssh \"chmod +x init.sh\"")
+        minikube_cmd("cluster2-m02", "ssh \"chmod +x init.sh\"")
 
     ingress_node = minikube_get_ingress_node()
 
@@ -107,12 +108,13 @@ def main():
 
     if not update_host(minikube_ip_ingress, ['argocd.world.xpt', 'rancher.world.xpt']):
         console.print("Minikube installation failed: update hosts", style="error")
-        return
+        return 1
 
     # Execute initialization script on minikube nodes
     minikube_cmd("cluster2", "ssh \"sudo ./init.sh\"", is_print=True)
     minikube_cmd("cluster2-m02", "ssh \"sudo ./init.sh\"", is_print=True)
 
+    return 0
 
 if __name__ == "__main__":
-    main()
+    exit(main())
