@@ -95,21 +95,11 @@ def main() -> int:
         console.print("Minikube installation failed: invalid minikube ip/ssh-key", style="error")
         return 1
 
-    if os.path.isfile("init.sh"):
-        # Copy initialization script to minikube nodes
-        scp(minikube_ip1, sshkey1, "init.sh")
-        scp(minikube_ip2, sshkey2, "init.sh")
-        minikube_cmd("cluster2", "ssh \"chmod +x init.sh\"")
-        minikube_cmd("cluster2-m02", "ssh \"chmod +x init.sh\"")
-
-        if os.path.isfile("values.conf"):
-            scp(minikube_ip1, sshkey1, "values.conf")
-            scp(minikube_ip2, sshkey2, "values.conf")
-
-        # Execute initialization script on minikube nodes
-        console.print("Running init script on nodes...")
-        minikube_cmd("cluster2", "ssh \"sudo ./init.sh\"", is_print=True)
-        minikube_cmd("cluster2-m02", "ssh \"sudo ./init.sh\"", is_print=True)
+    # Execute initialization script on minikube nodes
+    console.print("Running init script on nodes...")
+    cmd = "ssh \"[ -f init.sh ] && sudo sh init.sh\""
+    minikube_cmd("cluster2", cmd, is_print=True)
+    minikube_cmd("cluster2-m02", cmd, is_print=True)
 
     ingress_node = minikube_get_ingress_node()
 

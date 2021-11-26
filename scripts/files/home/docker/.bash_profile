@@ -1,0 +1,1 @@
+[ -f .values.conf ] && source .values.conf
