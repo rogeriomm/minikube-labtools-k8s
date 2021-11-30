@@ -38,7 +38,7 @@ cluster2_create()
 
   minikube -p $PROFILE start \
            --kubernetes-version="v${KUBERNETES_VERSION}" \
-           --nodes 2 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
+           --nodes 3 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
   minikube -p $PROFILE addons enable ingress
   minikube -p $PROFILE addons enable ingress-dns
@@ -57,14 +57,6 @@ clusters_start()
   set -x
   set -e
 
-  cp -r ./files "$MINIKUBE_HOME"
-
-  # Copy certificate
-  copy_cert
-
-  # Create mounts, edit fstab
-  create_mounts
-
   minikube -p cluster2 start --embed-certs
 
   minikube -p cluster start --embed-certs
@@ -72,14 +64,10 @@ clusters_start()
   source "$MINIKUBE_HOME"/docker-env
 
   minikube profile cluster2
-
-  clusters_post_start
 }
 
 clusters_post_start()
 {
-  echo "HOST_USERNAME=${USERNAME}" > "${MINIKUBE_FILES}/home/docker/.values.conf"
-
   python3 minikube-init.py
 
   argocd_show_password
@@ -183,7 +171,18 @@ init()
   minikube -p cluster delete
   minikube -p cluster2 delete
 
-  clusters_start
+  cp -r ./files "$MINIKUBE_HOME"
+
+  # Copy certificate
+  copy_cert
+
+  # Create mounts, edit fstab
+  create_mounts
+
+  echo "HOST_USERNAME=${USERNAME}" > "${MINIKUBE_FILES}/home/docker/.values.conf"
+
+  cluster1_create
+  cluster2_create
 
   # Setup internal registry
   internal_registry_setup
@@ -196,16 +195,16 @@ init()
 
   # Setup Argocd
   argocd_setup
-}
 
-# //192.168.0.201/share /share cifs  credentials=/home/docker/.smbcredentials 0 0
-# sudo mount.cifs "\\\\192.168.0.201\share" -o user=rogermm,pass=password /data/share
-post_init()
-{
-  echo "Post installation..."
-  set -x
+  # RANCHER setup
   rancher_setup
+
+  # //192.168.0.201/share /share cifs  credentials=/home/docker/.smbcredentials 0 0
+  # sudo mount.cifs "\\\\192.168.0.201\share" -o user=rogermm,pass=password /data/share
   python3 minikube-init.py
+
+  clusters_start
+
   argocd_show_password
   rancher_show_password
 }

@@ -6,7 +6,6 @@ if [[ "$1" = "install" ]]; then
   sudo echo -n
   are_you_sure
   init
-  post_init
 elif [[ "$1" = "postinstall" ]]; then
   sudo echo
   post_init
