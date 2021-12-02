@@ -68,7 +68,7 @@ clusters_start()
 
 clusters_post_start()
 {
-  python3 minikube-init.py
+  sudo -E python3 minikube-init.py
 
   argocd_show_password
 
@@ -123,7 +123,7 @@ rancher_setup()
   kubectl create namespace cattle-system
   helm install rancher rancher-stable/rancher \
      --namespace cattle-system \
-     --set hostname=rancher.world.xpt \
+     --set hostname=rancher.worldl.xpt \
      --set replicas=2 \
      --set ingress.tls.source=secret
 }
@@ -199,12 +199,5 @@ init()
   # RANCHER setup
   rancher_setup
 
-  # //192.168.0.201/share /share cifs  credentials=/home/docker/.smbcredentials 0 0
-  # sudo mount.cifs "\\\\192.168.0.201\share" -o user=rogermm,pass=password /data/share
-  python3 minikube-init.py
-
   clusters_start
-
-  argocd_show_password
-  rancher_show_password
 }
