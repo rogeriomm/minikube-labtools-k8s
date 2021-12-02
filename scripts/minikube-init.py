@@ -123,9 +123,7 @@ def main() -> int:
         f.write("nameserver 127.0.0.1")
 
     # Reload Dnsmasqd configuration and clear cache
-    assert os.system("cp $(sudo -u $SUDO_USER brew list dnsmasq | grep /homebrew.mxcl.dnsmasq.plist$) /Library/LaunchDaemons/") == 0
-    assert os.system("launchctl unload /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist") == 0
-    assert os.system("launchctl load /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist") == 0
+    assert os.system("sudo brew services restart dnsmasq") == 0
     assert os.system("dscacheutil -flushcache") == 0
 
     return 0
