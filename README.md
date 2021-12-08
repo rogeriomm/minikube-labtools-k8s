@@ -1,6 +1,7 @@
    * Minikube Kubernetes setup
       * 3 cluster nodes
       * Ingress using minikube addon
+         * With wildcard DNS record resolving to the ip of Ingress node. Using Dnsmasq instead of Minikube addon ingress-dns   
       * Container registry
       * ArgoCD 
       * RANCHER 2.6
@@ -38,6 +39,7 @@ scutil --dns
 ```
 ```commandline
 sudo brew services restart dnsmasq
+brew services list
 ```
 
 # ArgoCD

@@ -41,7 +41,7 @@ cluster2_create()
            --nodes 3 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
   minikube -p $PROFILE addons enable ingress
-  minikube -p $PROFILE addons enable ingress-dns
+  minikube -p $PROFILE addons disable ingress-dns
   minikube -p $PROFILE addons enable registry
   minikube -p $PROFILE addons enable registry-aliases
   minikube -p $PROFILE addons enable dashboard
