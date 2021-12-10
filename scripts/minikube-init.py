@@ -130,7 +130,7 @@ def main() -> int:
     with open('/usr/local/etc/dnsmasq.conf', 'w') as f:
         f.write("listen-address=0.0.0.0")
 
-    # Reload Dnsmasqd configuration and clear cache
+    # Reload Dnsmasq configuration and clear cache
     assert os.system("sudo brew services restart dnsmasq") == 0
     assert os.system("dscacheutil -flushcache") == 0
 
