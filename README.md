@@ -75,10 +75,12 @@ dig @10.96.0.10 web.default.svc.cluster.local
 ```
    * Check TCP service/pod TCP connection
 ```commandline
-curl http://10.109.115.245:8080
+curl http://web.default.svc.cluster.local:8080
 ```
 ## Ingress dns lookups
-
+```commandline
+ping anything.worldl.xpt
+```
 
 # References
    * https://argo-cd.readthedocs.io/en/stable/getting_started/

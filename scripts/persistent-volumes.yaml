@@ -32,4 +32,157 @@ metadata:
     name: direct-csi-min-io
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0001
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/lab/pv0001
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0002
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/lab/pv0002
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0003
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/lab/pv0003
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0004
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/lab/pv0004
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0005
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: nfs
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/lab/pv0005
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage-pv0001
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/local-storage/pv0001
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage-pv0002
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/local-storage/pv0002
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage-pv0003
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/local-storage/pv0003
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage-pv0004
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/local-storage/pv0004
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage-pv0005
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/local-storage/pv0005
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage-pv0006
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  hostPath:
+    path: /Volumes/data/local-storage/pv0006
