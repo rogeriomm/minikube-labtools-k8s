@@ -48,6 +48,7 @@ cluster2_create()
   minikube -p $PROFILE addons enable metrics-server
   minikube -p $PROFILE addons disable registry-creds
   minikube -p $PROFILE addons enable metallb
+  minikube -p $PROFILE addons disable storage-provisioner
 
   minikube -p $PROFILE addons list
 }
