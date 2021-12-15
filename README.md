@@ -27,6 +27,17 @@ pip install kubernetes rich
 sudo nfsd enable
 sudo nfsd restart
 ```
+   * Create user "minio" using MAC OS GUI. Change UniqueID,GroupID
+```commandline
+sudo dscl . -create /Groups/minio PrimaryGroupID 1000
+sudo dscl . -change /Users/minio UniqueID 502 1000
+sudo dscl . -change /Users/minio PrimaryGroupID 20 1000
+```
+
+```commandline
+sudo mkdir -p /Volumes/data/local-storage/pv000{1,2,3,4,5,6}
+sudo chown minio:minio /Volumes/data/local-storage/*
+```
 
 ## Dnsmasq
    * /usr/local/etc/dnsmasq.d/world.xpt.conf
