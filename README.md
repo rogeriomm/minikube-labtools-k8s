@@ -27,17 +27,6 @@ pip install kubernetes rich
 sudo nfsd enable
 sudo nfsd restart
 ```
-   * Create user "minio" using MAC OS GUI. Change UniqueID,GroupID
-```commandline
-sudo dscl . -create /Groups/minio PrimaryGroupID 1000
-sudo dscl . -change /Users/minio UniqueID 502 1000
-sudo dscl . -change /Users/minio PrimaryGroupID 20 1000
-```
-
-```commandline
-sudo mkdir -p /Volumes/data/local-storage/pv000{1,2,3,4,5,6}
-sudo chown minio:minio /Volumes/data/local-storage/*
-```
 
 ## Dnsmasq
    * /usr/local/etc/dnsmasq.d/world.xpt.conf
@@ -51,6 +40,17 @@ scutil --dns
 ```commandline
 sudo brew services restart dnsmasq
 brew services list
+```
+
+## Persistent volumes
+```commandline
+minikube --node=cluster2     ssh "sudo rm -rf /data/local-storage/pv000{1,2}"
+minikube --node=cluster2-m02 ssh "sudo rm -rf /data/local-storage/pv000{3,4}"
+minikube --node=cluster2-m03 ssh "sudo rm -rf /data/local-storage/pv000{5,6}"
+
+minikube --node=cluster2     ssh "sudo mkdir -p /data/local-storage/pv000{1,2}"
+minikube --node=cluster2-m02 ssh "sudo mkdir -p /data/local-storage/pv000{3,4}"
+minikube --node=cluster2-m03 ssh "sudo mkdir -p /data/local-storage/pv000{5,6}"
 ```
 
 # ArgoCD
@@ -99,3 +99,4 @@ ping anything.worldl.xpt
    * https://www.youtube.com/watch?v=_pUXOn_VRdQ: Nginx Ingress Controller Minikube with dnsmasq
    * https://gist.github.com/davebarnwell/c408533d608bfe24f4f5: Install dnsmasq and configure for *.dev.local domains
    * https://gist.github.com/loa/a88803c5678381eb515ab7f1241199a3: Minikube host networking integration
+   * https://kubernetes.io/docs/concepts/storage/volumes/#local: 
