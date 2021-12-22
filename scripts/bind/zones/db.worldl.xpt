@@ -1,0 +1,11 @@
+$TTL    604800
+@       IN      SOA     worldl.xpt. root.worldl.xpt (
+                  3     ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800 )   ; Negative Cache TTL
+
+     IN      NS      macos.worldl.xpt.
+
+macos.worldl.xpt. IN A 192.168.0.250
