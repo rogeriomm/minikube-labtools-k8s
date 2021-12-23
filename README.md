@@ -28,20 +28,6 @@ sudo nfsd enable
 sudo nfsd restart
 ```
 
-## Dnsmasq
-   * /usr/local/etc/dnsmasq.d/world.xpt.conf
-```text
-address=/.world.xpt/192.168.64.118
-```
-
-```commandline
-scutil --dns
-```
-```commandline
-sudo brew services restart dnsmasq
-brew services list
-```
-
 ## Persistent volumes
 ```commandline
 minikube --node=cluster2     ssh "sudo rm -rf /data/local-storage/pv000{1,2}"
@@ -65,6 +51,20 @@ minikube --node=cluster2-m03 ssh "sudo mkdir -p /data/local-storage/pv000{5,6}"
 
 # Rancher
    * https://rancher.world.xpt
+
+## BIND
+```commandline
+sudo brew services restart bind
+sudo brew  services info bind
+```
+   * Debugging
+```commandline
+tail -f /usr/local/var/log/named/named.log
+```
+
+```commandline
+scutil --dns
+```
 
 # Post install checklist
 ## *.cluster.local dns lookups and service/pods connection on host
