@@ -22,6 +22,7 @@ brew install kustomize helm minikube zsh rancher-cli go
     export PATH=$PATH:"$GOPATH/bin"
     
     cd install/src
+    go get
     go install
 ```
 

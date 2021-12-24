@@ -217,7 +217,7 @@ func main() {
 	k := &k8s{}
 	b := Bind9{}
 
-	log.Println("Minikube lab tools")
+	log.Println("Minikube lab tool")
 	args := os.Args[1:]
 
 	if len(args) != 1 {
