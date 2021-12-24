@@ -38,19 +38,13 @@ sudo nfsd restart
 ```
 
 # ArgoCD
-   * ArgoCD login
-```commandline
-   kubectl port-forward svc/argocd-server -n argocd 8080:443
-   argocd login --insecure --username admin localhost:8080
-```
-
-   * ArgoCD web
-      * https://argocd.world.xpt
+   * https://argocd.world.xpt
 
 # Rancher
    * https://rancher.world.xpt
 
 ## BIND
+   * Restart service
 ```commandline
 sudo brew services restart bind
 sudo brew  services info bind
@@ -59,7 +53,7 @@ sudo brew  services info bind
 ```commandline
 tail -f /usr/local/var/log/named/named.log
 ```
-
+   * Getting MACOS dns configuration
 ```commandline
 scutil --dns
 ```
@@ -86,8 +80,10 @@ dig @10.96.0.10 web.default.svc.cluster.local
 ```commandline
 curl http://web.default.svc.cluster.local:8080
 ```
+
 ## Ingress dns lookups
 ```commandline
+minikube ip
 ping anything.worldl.xpt
 ```
 
