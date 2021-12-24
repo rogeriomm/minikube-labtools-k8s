@@ -262,6 +262,6 @@ func main() {
 	log.Println("Add Minikube IP route")
 	minikubeAddIpRoute()
 
-	//restartBind()
-	//flushDnsCache()
+	restartBind()
+	flushDnsCache()
 }
