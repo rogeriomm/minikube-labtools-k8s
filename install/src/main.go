@@ -264,10 +264,14 @@ func setIngress(namespace string, svc string, subDomain string) {
 
 	k8s.kubecfg()
 
-	log.Println("Set ingress: ", namespace, svc, subDomain)
+	log.Printf("Set ingress on service %s/%s, subdomain %s", namespace, svc, subDomain)
+	sudoValidateUser()
 	ip := k8s.getSvcIp(namespace, svc)
-	log.Println("Update Bind to resolve "+"*."+subDomain+"worldl.xpt"+"to service ip: ", ip)
+	log.Printf("Update Bind to resolve *.%s.worldl.xpt to service %s/%s ip %s", subDomain, namespace, svc, ip)
 	bind.updateResolver(subDomain, ip)
+
+	restartBind()
+	flushDnsCache()
 }
 
 func main() {
