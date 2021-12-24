@@ -178,6 +178,9 @@ func minikubeSsh(node string, parms string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if len(out) == 0 {
+		return
+	}
 	fmt.Println(string(out))
 }
 
