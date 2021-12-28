@@ -69,7 +69,7 @@ clusters_start()
 
 clusters_post_start()
 {
-  minikube-labtools-k8s-install configure
+  minikube-labtools-k8s configure
 
   argocd_show_password
 
