@@ -2,7 +2,7 @@
 # brew install docker-credential-helper
 
 # Last stable kuberbetes version supported by RANCHER 2.6
-KUBERNETES_VERSION="1.21.6"
+KUBERNETES_VERSION="1.22.3"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
@@ -73,7 +73,7 @@ clusters_post_start()
 
   argocd_show_password
 
-  rancher_show_password
+  #rancher_show_password
 }
 
 minikube_get_host_ip()
@@ -86,8 +86,8 @@ argocd_setup()
 {
   kubectx cluster2
   kubectl create namespace argocd
-  kubectl apply -n argocd -f argocd-install.yaml
-  kubectl apply -f argocd-ingress.yaml
+  kubectl apply -n argocd -f yaml/argocd-install.yaml
+  kubectl apply -f yaml/argocd-ingress.yaml
 }
 
 argocd_show_password()
@@ -113,7 +113,7 @@ internal_registry_setup()
   kubectl -n kube-system create configmap registry-cluster \
                   --from-literal=registryAliases=registry.minikube \
                   --from-literal=registryServiceHost=$(minikube -p cluster2 ip) # Internal registry
-  kubectl -n kube-system apply -f node-etc-hosts-update.yaml
+  kubectl -n kube-system apply -f yaml/node-etc-hosts-update.yaml
 }
 
 # https://rancher.com/docs/rancher/v2.5/en/installation/install-rancher-on-k8s/
@@ -154,12 +154,22 @@ create_mounts()
 
 are_you_sure()
 {
-  read -q "REPLY?Initialize Minikube(y/n)? "
+  # shellcheck disable=SC1049
+  if [ "$1" = "" ]; then
+    read -q "REPLY?Initialize Minikube(y/n)? "
+  else
+    read -q "REPLY?$1(y/n)? "
+  fi
   echo "\n"
 
   if [ "$REPLY" = "n" ]; then
     exit
   fi
+}
+
+sudoValidateUser()
+{
+  sudo -v
 }
 
 init()
@@ -192,13 +202,13 @@ init()
   minikube profile cluster2
   kubectx cluster2
 
-  kubectl apply -f persistent-volumes.yaml
+  kubectl apply -f yaml/persistent-volumes.yaml
 
   # Setup Argocd
   argocd_setup
 
   # RANCHER setup
-  rancher_setup
+  #rancher_setup
 
   clusters_start
 
