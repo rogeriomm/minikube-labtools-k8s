@@ -1,21 +1,58 @@
    * Minikube Kubernetes setup
       * 3 cluster nodes
       * Ingress using minikube addon
-         * With wildcard DNS record resolving to the ip of Ingress node. Using Dnsmasq instead of Minikube addon ingress-dns   
+         * With wildcard DNS record resolving to the ip of Ingress node. Using BIND instead of Minikube addon ingress-dns   
       * Container registry
+      * Local Docker, replace Docker Desktop
       * ArgoCD 
       * RANCHER 2.6
-      * Local Docker, replace Docker Desktop
 
-   * Tested only on MAC OS Monterey, 128G RAM, XEON 16 cores
+   * Target OS
+      * MACOS    
+         * Monterey, 128G RAM, XEON 16 cores
 
 # Install
-## Install brew packages
+## Install packages on MAC OS
 ```commandline
-brew install kustomize helm minikube zsh rancher-cli go
+brew install zsh minikube helm go kustomize
+```
+   * Optional
+```commandline
+brew install rancher-cli
 ```
 
-## Build and install tool
+
+## Install Minikube TLS CA certificate on MAC OS
+   * Go to directory "install/scripts/minikube-certs". Double-click ca.crt and add certificate on "System"
+   * Open "Keychain Access", click on "System", double-click "minikubeCA". 
+      * On "Trust" set "Always Trust"
+   * [Keychain Access screenshot](docs/MacOsKeyChainMinikubeCA.png)
+
+### Conda Issue
+   * https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/non-standard-certs.html: CONDA, Using non-standard certificates
+````commandline
+strace -f curl https://minio.minio-tenant-1.svc.cluster.local 2> /tmp/a
+grep ssl /tmp/a
+````
+   * It doesn't use /etc/openssl!!!
+```text
+openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/bin/../lib/./libssl.so.3", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/ssl/openssl.cnf", O_RDONLY) = 3
+openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/ssl/cacert.pem", O_RDONLY) = 6
+write(2, "More details here: https://curl."..., 264More details here: https://curl.se/docs/sslcerts.html
+```
+
+   * Append Minikube CA certificate on "/opt/conda/envs/python_3_with_R/ssl/cacert.pem". "strace" works
+   * "links" uses /etc/ssl directory
+   * aws cli doesn't validate certificate
+   * https://medium.com/@iffi33/dealing-with-ssl-authentication-on-a-secure-corporate-network-pip-conda-git-npm-yarn-bower-73e5b93fd4b2
+
+### See also
+   * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
+   * https://github.com/FiloSottile/mkcert: mkcert is a simple tool for making locally-trusted development certificates. It requires no configuration.
+
+
+## Build and install management tool
 ```commandline
     mkdir -p $HOME/go
     GOPATH="$HOME/go"
@@ -37,6 +74,9 @@ sudo nfsd enable
 sudo nfsd restart
 ```
 
+# Kubernets dashboard
+* https://dashboard.worldl.xpt/
+
 # ArgoCD
    * https://argocd.world.xpt
 
@@ -44,10 +84,7 @@ sudo nfsd restart
    * Disabled, waiting Kubernetes 1.22 compatibility for RANCHER 2.6
    * https://rancher.world.xpt
 
-# Kubernets dashboard
-   * https://dashboard.worldl.xpt/
-
-## BIND
+# BIND
    * Restart service
 ```commandline
 sudo brew services restart bind
