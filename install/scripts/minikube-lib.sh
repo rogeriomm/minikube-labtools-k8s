@@ -140,7 +140,7 @@ rancher_show_password()
 
 copy_cert()
 {
-  cp world.xpt.pem "${MINIKUBE_CERTS}/"
+  cp -rf minikube-certs/* "$MINIKUBE_HOME"
 }
 
 create_mounts()
@@ -182,15 +182,18 @@ init()
   minikube -p cluster delete
   minikube -p cluster2 delete
 
-  cp -r ./files "$MINIKUBE_HOME"
+  # Delete all files from Minikube home
+  rm -rf "$MINIKUBE_HOME"
+  mkdir -p "$MINIKUBE_HOME"
 
-  # Copy certificate
+  cp -r ./files "$MINIKUBE_HOME"
+  echo "HOST_USERNAME=${USERNAME}" > "${MINIKUBE_FILES}/home/docker/.values.conf"
+
+  # Copy TLS certificates
   copy_cert
 
   # Create mounts, edit fstab
   create_mounts
-
-  echo "HOST_USERNAME=${USERNAME}" > "${MINIKUBE_FILES}/home/docker/.values.conf"
 
   cluster1_create
   cluster2_create
