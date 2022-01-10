@@ -1,6 +1,6 @@
 package main
 
-// Last stable kuberbetes version supported by RANCHER 2.6
+// KUBERNETES_VERSION Last stable kubernetes version supported by RANCHER 2.6
 const KUBERNETES_VERSION = "1.21.6"
 
 func argocd_show_password() {

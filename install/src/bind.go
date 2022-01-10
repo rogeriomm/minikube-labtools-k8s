@@ -21,7 +21,10 @@ func (bind *Bind9) open() {
 }
 
 func (bind *Bind9) close() {
-	bind.f.Close()
+	err := bind.f.Close()
+	if err != nil {
+		return
+	}
 }
 
 func (bind *Bind9) findBindZone(key string) bool {

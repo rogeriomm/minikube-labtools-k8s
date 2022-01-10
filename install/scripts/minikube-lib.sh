@@ -1,7 +1,7 @@
 # https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
 # brew install docker-credential-helper
 
-# Last stable kuberbetes version supported by RANCHER 2.6
+# Last stable kubernetes version supported by RANCHER 2.6
 KUBERNETES_VERSION="1.22.3"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
@@ -79,7 +79,7 @@ clusters_post_start()
 minikube_get_host_ip()
 {
   ip=$(ifconfig bridge100 | grep "inet " | awk -F ' ' '{print $2}')
-  echo $ip
+  echo "$ip"
 }
 
 argocd_setup()
@@ -152,6 +152,16 @@ create_mounts()
   } >> "${MINIKUBE_ETC}/fstab"
 }
 
+k8s_nfs_provisioner_setup()
+{
+  helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+  helm repo update
+  kubectl create ns nfs-external-provisioner
+  helm install --namespace nfs-external-provisioner nfs-subdir-external-provisioner \
+      nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+      --values nfs-subdir-external-provisioner/values.yaml
+}
+
 are_you_sure()
 {
   # shellcheck disable=SC1049
@@ -204,6 +214,9 @@ init()
   # Set current minikube profile
   minikube profile cluster2
   kubectx cluster2
+
+  # Setup Kubernetes NFS Subdir External Provisioner
+  k8s_nfs_provisioner_setup
 
   kubectl apply -f yaml/persistent-volumes.yaml
 

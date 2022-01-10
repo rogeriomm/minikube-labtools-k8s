@@ -66,11 +66,12 @@ write(2, "More details here: https://curl."..., 264More details here: https://cu
 ## Configure MAC OS NFS server
    * /etc/exports
 ```text
-/Users/rogermm/git -maproot=rogermm -rw -network 192.168.64.0 -mask 255.255.255.0
-/Volumes/data -maproot=rogermm -rw -network 192.168.64.0 -mask 255.255.255.0
+/Users/rogermm/git -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
+/Volumes/data -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
 ```
 ```commandline
 sudo nfsd enable
+sudo nfsd checkexports
 sudo nfsd restart
 ```
 
@@ -150,6 +151,13 @@ kubectl -n ingress-nginx get deployment ingress-nginx-controller -o yaml | grep 
 ```
 
    * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
+
+# Kubernetes NFS Subdir External Provisioner
+## Uninstall
+```shell
+helm list
+helm uninstall nfs-subdir-external-provisioner
+```
 
 # See also
    * [Certificates](docs/HowToMakeIngressCertificate.md)
