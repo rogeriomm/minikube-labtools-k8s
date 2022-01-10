@@ -5,7 +5,7 @@ brew install cfssl
 
 # Create a Certificate Signing Request
 
-```commandline
+```shell
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
@@ -26,7 +26,7 @@ EOF
 ```
 
 # Create a Certificate Signing Request object to send to the Kubernetes API
-```commandline
+```shell
 cat <<EOF | kubectl apply -f -
 apiVersion: certificates.k8s.io/v1
 kind: CertificateSigningRequest
