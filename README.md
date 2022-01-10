@@ -12,7 +12,7 @@
          * Monterey, 128G RAM, XEON 16 cores
 
 # Install
-## Install packages on MAC OS
+## Install packages on MACOS
 ```commandline
 brew install zsh minikube helm go kustomize cfssl
 ```
@@ -22,7 +22,7 @@ brew install rancher-cli
 ```
 
 
-## Install Minikube TLS CA certificate on MAC OS
+## Install Minikube TLS CA certificate on MACOS
    * Go to directory "install/scripts/minikube-certs". Double-click ca.crt and add certificate on "System"
    * Open "Keychain Access", click on "System", double-click "minikubeCA". 
       * On "Trust" set "Always Trust"
@@ -30,12 +30,12 @@ brew install rancher-cli
 
 ### Conda Issue
    * https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/non-standard-certs.html: CONDA, Using non-standard certificates
-````commandline
+````shell
 strace -f curl https://minio.minio-tenant-1.svc.cluster.local 2> /tmp/a
 grep ssl /tmp/a
 ````
    * It doesn't use /etc/openssl!!!
-```text
+```
 openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/bin/../lib/./libssl.so.3", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/ssl/openssl.cnf", O_RDONLY) = 3
 openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/ssl/cacert.pem", O_RDONLY) = 6
@@ -53,7 +53,7 @@ write(2, "More details here: https://curl."..., 264More details here: https://cu
 
 
 ## Build and install management tool
-```commandline
+```shell
     mkdir -p $HOME/go
     GOPATH="$HOME/go"
     export PATH=$PATH:"$GOPATH/bin"
@@ -63,19 +63,21 @@ write(2, "More details here: https://curl."..., 264More details here: https://cu
     go install
 ```
 
-## Configure MAC OS NFS server
+## Configure MACOS NFS server
    * /etc/exports
-```text
-/Users/rogermm/git -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
-/Volumes/data -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
 ```
+/Users/rogermm/git -alldirs -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
+/Volumes/data -alldirs -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
+/Users/rogermm/nfs -alldirs -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
+```
+
 ```commandline
 sudo nfsd enable
 sudo nfsd checkexports
 sudo nfsd restart
 ```
 
-# Kubernets dashboard
+# Kubernetes dashboard
 * https://dashboard.worldl.xpt/
 
 # ArgoCD
@@ -117,7 +119,7 @@ NAME   TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
 web    NodePort   10.109.115.245   <none>        8080:32742/TCP   90s
 ```
    * Check dns cluster lookup
-```commandline
+```shell
 dig @10.96.0.10 kube-dns.kube-system.svc.cluster.local
 dig @10.96.0.10 web.default.svc.cluster.local
 ```
@@ -133,7 +135,7 @@ ping anything.worldl.xpt
 ```
 
 # Minikube Ingress TLS certificate
-```commandline
+```shell
 kubectl -n kube-system create secret tls mkcert --key $MINIKUBE_HOME/key.pem --cert $MINIKUBE_HOME/cert.pem
 ```
 
@@ -146,7 +148,7 @@ minikube addons enable ingress
 ```
 
   * Verify if custom certificate was enabled
-```commandline
+```shell
 kubectl -n ingress-nginx get deployment ingress-nginx-controller -o yaml | grep "kube-system"
 ```
 
