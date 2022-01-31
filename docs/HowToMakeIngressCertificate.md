@@ -9,7 +9,8 @@ brew install cfssl
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
-    "*.worldl.xpt"
+    "*.worldl.xpt",
+    "*.*.worldl.xpt"
   ],
   "CN": "system:node:my-pod.my-namespace.pod.cluster.local",
   "key": {
@@ -43,21 +44,27 @@ EOF
 ```
 
 # Get the Certificate Signing Request Approved
-```commandline
+```shell
 kubectl certificate approve my-svc.my-namespace
 ```
 
 # Download the Certificate and Use It
-```commandline
+```shell
 kubectl get csr
 ```
-```commandline
+
+```shell
 kubectl get csr my-svc.my-namespace -o jsonpath='{.status.certificate}' \
     | base64 --decode > server.crt
 ```
 
+   * Show server certificate
+```shell
+openssl x509 -in server.crt -noout -text
+```
+
 # Configure Minikube ingress 
-```commandline
+```shell
 cd install/scripts/ingress-certs
 kubectl -n kube-system delete secret mkcert
 kubectl -n kube-system create secret tls mkcert --key server-key.pem --cert server.crt
