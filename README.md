@@ -21,6 +21,13 @@ brew install zsh minikube helm go kustomize cfssl
 brew install rancher-cli
 ```
 
+## Setup network/firewal on MACOS
+   * Enable routing on MACOS
+```shell
+sysctl -w net.inet.ip.forwarding=1
+```
+   * Enable firewall, enable bind 
+     * System preference/Security & Privacy/Firewall Options 
 
 ## Install Minikube TLS CA certificate on MACOS
    * Go to directory "install/scripts/minikube-certs". Double-click ca.crt and add certificate on "System"
@@ -34,7 +41,7 @@ brew install rancher-cli
 strace -f curl https://minio.minio-tenant-1.svc.cluster.local 2> /tmp/a
 grep ssl /tmp/a
 ````
-   * It doesn't use /etc/openssl!!!
+   * Conda doesn't use /etc/openssl! strace log:
 ```
 openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/bin/../lib/./libssl.so.3", O_RDONLY|O_CLOEXEC) = 3
 openat(AT_FDCWD, "/opt/conda/envs/python_3_with_R/ssl/openssl.cnf", O_RDONLY) = 3
@@ -78,7 +85,7 @@ sudo nfsd restart
 ```
 
 # Kubernetes dashboard
-* https://dashboard.worldl.xpt/
+   * https://dashboard.worldl.xpt/
 
 # ArgoCD
    * https://argocd.world.xpt
@@ -136,9 +143,16 @@ ping anything.worldl.xpt
 
 # Minikube Ingress TLS certificate
 ```shell
-kubectl -n kube-system create secret tls mkcert --key $MINIKUBE_HOME/key.pem --cert $MINIKUBE_HOME/cert.pem
+kubectl -n kube-system delete secret mkcert
 ```
 
+```shell
+kubectl -n kube-system create secret tls mkcert \ 
+          --key  "$LABTOOLS/install/scripts/ingress-certs/server-key.pem" \
+          --cert "$LABTOOLS/install/scripts/ingress-certs/server.crt"
+```
+
+   * _kube-system/mkcert_
 ```commandline
 minikube addons configure ingress
 ```
@@ -162,8 +176,8 @@ helm uninstall nfs-subdir-external-provisioner
 ```
 
 # See also
-   * [Certificates](docs/HowToMakeIngressCertificate.md)
-   * [Jetbrains](docs/Jetbrains.md)
+   * [How to make ingress certificate](docs/HowToMakeIngressCertificate.md)
+   * [Jetbrains configuration](docs/Jetbrains.md)
 
 # References
    * https://argo-cd.readthedocs.io/en/stable/getting_started/
