@@ -64,12 +64,18 @@ func configure() {
 
 	log.Println("Creating storage on Minikube nodes")
 	var pv int64 = 1
+	var pvs int64 = 1
 	for _, node := range nodeList.Items {
 		minikubeSsh(node.Name, "sudo mkdir -p /data/local-storage/pv000"+strconv.FormatInt(pv, 10))
 		pv++
 		minikubeSsh(node.Name, "sudo mkdir -p /data/local-storage/pv000"+strconv.FormatInt(pv, 10))
 		pv++
-		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage")
+		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage/pv000"+strconv.FormatInt(pvs, 10))
+		pvs++
+		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage/pv000"+strconv.FormatInt(pvs, 10))
+		pvs++
+		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage/pv000"+strconv.FormatInt(pvs, 10))
+		pvs++
 	}
 
 	minikubeSetProfile("cluster2")

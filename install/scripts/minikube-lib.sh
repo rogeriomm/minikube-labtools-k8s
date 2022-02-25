@@ -2,7 +2,7 @@
 # brew install docker-credential-helper
 
 # Last stable kubernetes version supported by RANCHER 2.6
-KUBERNETES_VERSION="1.23.2"
+KUBERNETES_VERSION="1.23.3"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files

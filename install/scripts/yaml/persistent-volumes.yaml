@@ -1,39 +1,5 @@
 #
-# NFS
 #
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: lab-volume
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: remote
-  accessModes:
-    - ReadWriteMany
-  capacity:
-    storage: 100Gi
-  hostPath:
-    path: /Volumes/data/lab
-
-#
-#
-#
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: host-volume
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: host
-  accessModes:
-    - ReadWriteMany
-  capacity:
-    storage: 300Gi
-  hostPath:
-    path: /data # Minikube static data
-#
-# NFS storage
 #
 ---
 apiVersion: storage.k8s.io/v1
@@ -42,76 +8,6 @@ metadata:
     name: direct-csi-min-io
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv0001
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: nfs
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 100Gi
-  hostPath:
-    path: /Volumes/data/lab/pv0001
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv0002
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: nfs
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 100Gi
-  hostPath:
-    path: /Volumes/data/lab/pv0002
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv0003
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: nfs
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 100Gi
-  hostPath:
-    path: /Volumes/data/lab/pv0003
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv0004
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: nfs
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 100Gi
-  hostPath:
-    path: /Volumes/data/lab/pv0004
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv0005
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: nfs
-  accessModes:
-    - ReadWriteOnce
-  capacity:
-    storage: 100Gi
-  hostPath:
-    path: /Volumes/data/lab/pv0005
 #
 # MINIO storage, class "minio-local-storage"
 #
@@ -269,7 +165,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: standard-storage-cluster2
+  name: standard-storage-pv0001
 spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: standard
@@ -279,7 +175,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /data/standard-storage
+    path: /data/standard-storage/pv0001
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -292,7 +188,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: standard-storage-cluster2-m02
+  name: standard-storage-pv0002
 spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: standard
@@ -302,7 +198,56 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /data/standard-storage
+    path: /data/standard-storage/pv0002
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0003
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0003
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2
+
+
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0004
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0004
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -315,7 +260,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: standard-storage-cluster2-m03
+  name: standard-storage-pv0005
 spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: standard
@@ -325,7 +270,102 @@ spec:
   accessModes:
     - ReadWriteOnce
   local:
-    path: /data/standard-storage
+    path: /data/standard-storage/pv0005
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m02
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0006
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0006
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m02
+
+
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0007
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0007
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m03
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0008
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0008
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m03
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0009
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0009
   nodeAffinity:
     required:
       nodeSelectorTerms:
