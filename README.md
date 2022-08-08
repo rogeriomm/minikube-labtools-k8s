@@ -8,8 +8,8 @@
       * RANCHER 2.6
 
    * Target OS
-      * MACOS    
-         * Monterey, 128G RAM, XEON 16 cores
+      * MACOS Ventura 
+         * 128G RAM, XEON E5-2696 v4 22 cores, 44 threads 
 
 # Install
 ## Install packages on MACOS
