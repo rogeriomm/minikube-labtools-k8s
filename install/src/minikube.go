@@ -13,7 +13,7 @@ func minikubeRun(cmd string) {
 func minikubeSsh(node string, parms string) {
 	out, err := exec.Command("minikube", "--node="+node, "ssh", parms).Output()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	if len(out) == 0 {
 		return

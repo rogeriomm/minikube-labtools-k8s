@@ -11,5 +11,5 @@ sysfs           /sys            sysfs   defaults        0       0
 #
 # Restart nfs service "sudo nfsd restart"
 #
-host.minikube.internal:/Volumes/data /Volumes/data nfs defaults 0 0
+host.minikube.internal:/Volumes/data /Volumes/data nfs nfsvers=3 0 0
 #

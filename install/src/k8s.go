@@ -50,11 +50,20 @@ func (k *k8s) getNodeIngress() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return p.Items[0].Spec.NodeName
+
+	if len(p.Items) > 0 {
+		return p.Items[0].Spec.NodeName
+	} else {
+		return ""
+	}
 }
 
 func (k *k8s) getIngressMinikube() string {
 	node := k.getNodeIngress()
+
+	if node == "" {
+		log.Fatal("Ingress pod doesn't exist")
+	}
 
 	n, err := k.core.Nodes().Get(context.TODO(), node, metav1.GetOptions{})
 	if err != nil {
