@@ -1,8 +1,10 @@
 #!/usr/bin/env zsh
 
-sudo -v
-
 source minikube-lib.sh
+
+minikube_check_config
+
+sudo -v
 
 clusters_start
 
@@ -18,4 +20,3 @@ fi
 sudo -v
 
 clusters_post_start
-
