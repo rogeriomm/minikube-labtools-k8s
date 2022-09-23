@@ -15,10 +15,6 @@
 ```shell
 brew install zsh minikube helm go kustomize cfssl
 ```
-   * Optional
-```shell
-brew install rancher-cli
-```
 
 ## Setup network/firewal on MACOS
    * Enable routing on MACOS
