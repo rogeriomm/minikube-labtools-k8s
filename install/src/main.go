@@ -12,8 +12,9 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"strconv"
 )
+
+var kub k8s
 
 func flushDnsCache() {
 	log.Println("Flushing host DNS cache...")
@@ -38,20 +39,21 @@ func sudoValidateUser() {
 }
 
 func configure() {
-	k8s := &k8s{}
 	bind := Bind9{}
 
 	log.Println("Configure")
 
 	sudoValidateUser()
 
-	k8s.kubecfg()
-	ipIngressMinikube := k8s.getIngressMinikube()
+	kub.kubecfg("cluster2")
+	minikubeSetProfile("cluster2")
+
+	ipIngressMinikube := kub.getIngressMinikube()
 	log.Println("Minikube ingress ip:", ipIngressMinikube)
 
 	bind.updateK8sIngress(ipIngressMinikube)
 
-	nodeList, err1 := k8s.core.Nodes().List(context.TODO(), metav1.ListOptions{})
+	nodeList, err1 := kub.core.Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err1 != nil {
 		log.Fatal(err1)
 	}
@@ -62,22 +64,9 @@ func configure() {
 	}
 
 	log.Println("Creating storage on Minikube nodes")
-	var pv int64 = 1
-	var pvs int64 = 1
-	for _, node := range nodeList.Items {
-		minikubeSsh(node.Name, "sudo mkdir -p /data/local-storage/pv000"+strconv.FormatInt(pv, 10))
-		pv++
-		minikubeSsh(node.Name, "sudo mkdir -p /data/local-storage/pv000"+strconv.FormatInt(pv, 10))
-		pv++
-		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage/pv000"+strconv.FormatInt(pvs, 10))
-		pvs++
-		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage/pv000"+strconv.FormatInt(pvs, 10))
-		pvs++
-		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage/pv000"+strconv.FormatInt(pvs, 10))
-		pvs++
-	}
 
-	minikubeSetProfile("cluster2")
+	createPv("cluster")
+	createPv("cluster2")
 
 	log.Println("Add Minikube IP route")
 	minikubeAddIpRoute()
@@ -92,10 +81,9 @@ func setIngress(argv []string) {
 		log.Fatal("Invalid argument")
 	}
 
-	k8s := k8s{}
 	bind := Bind9{}
 
-	k8s.kubecfg()
+	kub.kubecfg("cluster2")
 
 	namespace := argv[0]
 	svc := argv[1]
@@ -103,7 +91,7 @@ func setIngress(argv []string) {
 
 	log.Printf("Set ingress on service %s/%s, subdomain %s", namespace, svc, subDomain)
 	sudoValidateUser()
-	ip := k8s.getSvcIp(namespace, svc)
+	ip := kub.getSvcIp(namespace, svc)
 	log.Printf("Update Bind to resolve \"*.%s.worldl.xpt\" and \"%s.worldl.xpt\""+
 		" to service \"%s/%s ip %s\"",
 		subDomain, subDomain, namespace, svc, ip)
@@ -113,11 +101,37 @@ func setIngress(argv []string) {
 	flushDnsCache()
 }
 
-func cleanAvailablePv() {
-	k8s := k8s{}
-	k8s.kubecfg()
+func createPv(ctx string) {
+	kub.kubecfg(ctx)
+	minikubeSetProfile(ctx)
 
-	pvList, err := k8s.core.PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
+	pvList, err := kub.core.PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, pv := range pvList.Items {
+		if pv.Spec.StorageClassName == "standard" &&
+			*pv.Spec.VolumeMode == "Filesystem" {
+
+			// FIXME check array size
+			operator := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Operator
+			node := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Values[0]
+			path := pv.Spec.Local.Path
+
+			if operator == "In" {
+				minikubeSsh(node,
+					"sudo mkdir -p "+path)
+			}
+		}
+	}
+}
+
+func cleanAvailablePv(ctx string) {
+	kub.kubecfg(ctx)
+	minikubeSetProfile(ctx)
+
+	pvList, err := kub.core.PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +149,10 @@ func cleanAvailablePv() {
 
 			if operator == "In" {
 				println("Cleanning node:", node, " pv:", name, " path:", path)
-				minikubeSsh(node, "cd "+path+" && ls -A1 | xargs rm -rf")
+				minikubeSsh(node,
+					"sudo mkdir -p "+path+
+						" && cd "+path+
+						" && ls -A1 | sudo xargs rm -rf")
 			}
 		}
 	}
@@ -185,7 +202,11 @@ func main() {
 	case "set-ingress":
 		setIngress(args[1:])
 	case "clean-available-pv":
-		cleanAvailablePv()
+		if len(args) < 2 {
+			help()
+			return
+		}
+		cleanAvailablePv(args[1])
 	default:
 		log.Fatal("Invalid command: " + args[0])
 		help()
