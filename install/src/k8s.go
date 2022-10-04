@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -11,11 +13,13 @@ import (
 	"k8s.io/client-go/util/homedir"
 	"log"
 	"path/filepath"
+	"strings"
 )
 
 type k8s struct {
-	core   v1.CoreV1Interface
-	config string // FIXME remove
+	core          v1.CoreV1Interface
+	config        string // FIXME remove
+	serverVersion string
 }
 
 /*
@@ -63,6 +67,19 @@ func (k *k8s) kubecfg(ctx string) {
 			log.Fatal(err)
 		}
 	}
+
+	discoveryClient, err := discovery.NewDiscoveryClientForConfig(config)
+
+	if err != nil {
+		fmt.Printf(" error in discoveryClient %v", err)
+	}
+
+	information, err := discoveryClient.ServerVersion()
+	if err != nil {
+		fmt.Println("Error while fetching server version information", err)
+	}
+
+	k.serverVersion = strings.ReplaceAll(information.GitVersion, "v", "")
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
