@@ -109,7 +109,7 @@ scutil --dns
 
 # Post install checklist
 ## *.cluster.local dns lookups and service/pods connection on host
-```commandline
+```shell
 kubectl create namespace default
 kubectl create deployment web --image=gcr.io/google-samples/hello-app:1.0 -n default
 kubectl expose deployment web --type=NodePort --port=8080 -n default
@@ -162,6 +162,15 @@ kubectl -n ingress-nginx get deployment ingress-nginx-controller -o yaml | grep 
 ```
 
    * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
+
+# Kubectl versions
+   * https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/
+   * https://faun.pub/using-different-kubectl-versions-with-multiple-kubernetes-clusters-a3ad8707b87b
+
+```shell
+version=1.18.14 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64/kubectl" -o kubectl-$version && chmod +x kubectl-$version 
+version=1.23.12 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64/kubectl" -o kubectl-$version && chmod +x kubectl-$version 
+```
 
 # Kubernetes NFS Subdir External Provisioner
 ## Uninstall
