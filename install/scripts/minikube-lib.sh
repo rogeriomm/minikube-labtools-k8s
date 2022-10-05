@@ -63,6 +63,8 @@ cluster1_create()
 
   minikube -p $PROFILE start \
            --kubernetes-version="v${KUBERNETES_VERSION_1}" \
+           --service-cluster-ip-range='10.112.0.0/12' \   # 0x0a 0x70 0x00 0x00
+           --dns-domain='cluster1.local' \
            --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
   minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
@@ -81,6 +83,8 @@ cluster2_create()
 
   minikube -p $PROFILE start \
            --kubernetes-version="v${KUBERNETES_VERSION_2}" \
+           --service-cluster-ip-range='10.96.0.0/12' \   # 0x0a 0x60 0x00 0x00
+           --dns-domain='cluster.local' \
            --extra-config=kubelet.max-pods=100 \
            --nodes 3 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
@@ -129,7 +133,7 @@ clusters_start()
 
 clusters_post_start()
 {
-  minikube-labtools-k8s configure
+  labtools-k8s configure
 
   argocd_show_password
 
