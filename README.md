@@ -178,36 +178,44 @@ kubectl get svc --namespace=kube-system
 kubectl get svc --namespace=kube-system kube-dns
 ```
 
-````shell
+```shell
 minikube start --help
-````
+```
 
    * Test DNS cluster 1
-````shell
+```shell
 dig @10.112.0.10 www.google.com
-````
+```
 
 * Test DNS cluster 2
-````shell
+```shell
 dig @10.96.0.10 www.google.com
-````
-
-
-````text
-    --dns-domain='cluster.local':
-	The cluster dns domain name used in the Kubernetes cluster
-	
-    --service-cluster-ip-range='10.96.0.0/12':
-	The CIDR to be used for service cluster IPs.
-````
-
-
-```text
-NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
-kube-dns         ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP,9153/TCP   34h
-metrics-server   ClusterIP   10.103.251.192   <none>        443/TCP                  34h
-registry         ClusterIP   10.108.217.104   <none>        80/TCP,443/TCP           34h
 ```
+
+## BIND configuration
+   * /usr/local/etc/bind/named.conf.local
+````text
+zone "worldl.xpt" in { // Domain name
+    type master; // Primary DNS
+    file "/usr/local/etc/bind/zones/db.worldl.xpt"; // Forward lookup file
+    allow-update { none; }; // Primary DNS
+};
+
+// Minikube DNS resolver to domain *.cluster.local"
+zone "cluster.local" in {
+   type forward;
+   forward only;
+   forwarders { 10.96.0.10; };
+};
+
+// Minikube DNS resolver to domain *.cluster1.local"
+zone "cluster1.local" in {
+   type forward;
+   forward only;
+   forwarders { 10.112.0.10; };
+}
+````
+
 
 # Kubernetes NFS Subdir External Provisioner
 ## Uninstall
