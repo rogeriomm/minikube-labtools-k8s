@@ -182,6 +182,17 @@ kubectl get svc --namespace=kube-system kube-dns
 minikube start --help
 ````
 
+   * Test DNS cluster 1
+````shell
+dig @10.112.0.10 www.google.com
+````
+
+* Test DNS cluster 2
+````shell
+dig @10.96.0.10 www.google.com
+````
+
+
 ````text
     --dns-domain='cluster.local':
 	The cluster dns domain name used in the Kubernetes cluster
