@@ -172,12 +172,45 @@ version=1.18.14 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64
 version=1.23.12 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64/kubectl" -o kubectl-$version && chmod +x kubectl-$version 
 ```
 
+# DNS
+```shell
+kubectl get svc --namespace=kube-system
+kubectl get svc --namespace=kube-system kube-dns
+```
+
+````shell
+minikube start --help
+````
+
+````text
+    --dns-domain='cluster.local':
+	The cluster dns domain name used in the Kubernetes cluster
+	
+    --service-cluster-ip-range='10.96.0.0/12':
+	The CIDR to be used for service cluster IPs.
+````
+
+
+```text
+NAME             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+kube-dns         ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP,9153/TCP   34h
+metrics-server   ClusterIP   10.103.251.192   <none>        443/TCP                  34h
+registry         ClusterIP   10.108.217.104   <none>        80/TCP,443/TCP           34h
+```
+
 # Kubernetes NFS Subdir External Provisioner
 ## Uninstall
 ```shell
 helm list
 helm uninstall nfs-subdir-external-provisioner
 ```
+
+# Hyperkit
+   * https://stackoverflow.com/questions/59674804/how-to-list-vms-that-was-started-from-hyperkit
+
+````shell
+ps -Af | grep hyperkit
+````
 
 # See also
    * [How to make ingress certificate](docs/HowToMakeIngressCertificate.md)
