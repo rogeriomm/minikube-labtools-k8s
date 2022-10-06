@@ -174,12 +174,10 @@ version=1.23.12 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64
 
 # DNS
 ```shell
-kubectl get svc --namespace=kube-system
+kubectx cluster
 kubectl get svc --namespace=kube-system kube-dns
-```
-
-```shell
-minikube start --help
+kubectx cluster2
+kubectl get svc --namespace=kube-system kube-dns
 ```
 
    * Test DNS cluster 1
