@@ -8,4 +8,7 @@ $TTL    604800
 
      IN      NS      macos.worldl.xpt.
 
-macos.worldl.xpt. IN A 192.168.0.250
+macos.worldl.xpt. IN A 192.168.100.250
+
+$INCLUDE /usr/local/etc/bind/zones/zeppelin.worldl.xpt
+$INCLUDE /usr/local/etc/bind/zones/ingress-k8s.worldl.xpt
