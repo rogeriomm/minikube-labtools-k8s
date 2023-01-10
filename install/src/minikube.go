@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"log"
 	"os/exec"
 )
@@ -10,15 +11,19 @@ func minikubeRun(cmd string) {
 	fmt.Println(cmd)
 }
 
-func minikubeSsh(node string, parms string) {
-	out, err := exec.Command("minikube", "--node="+node, "ssh", parms).Output()
+func minikubeSsh(node string, params string) error {
+	out, err := exec.Command("minikube", "--node="+node, "ssh", params).Output()
 	if err != nil {
+		err = errors.Errorf("Minikube ssh %s %s %v", node, params, err)
 		log.Println(err)
+		return err
 	}
 	if len(out) == 0 {
-		return
+		return nil
 	}
 	fmt.Println(string(out))
+
+	return nil
 }
 
 func minikubeSetProfile(name string) {

@@ -4,16 +4,17 @@ zone "worldl.xpt" in { // Domain name
     allow-update { none; }; // Primary DNS
 };
 
-// Minikube DNS resolver to domain *.cluster.local"
-zone "cluster.local" in {
+// Minikube DNS resolver to domain *.cluster1.xpt"
+zone "cluster1.xpt" in {
+   type forward;
+   forward only;
+   forwarders { 10.112.0.10; };
+};
+
+// Minikube DNS resolver to domain *.cluster2.xpt"
+zone "cluster2.xpt" in {
    type forward;
    forward only;
    forwarders { 10.96.0.10; };
 };
 
-// Minikube DNS resolver to domain *.cluster1.local"
-zone "cluster1.local" in {
-   type forward;
-   forward only;
-   forwarders { 10.112.0.10; };
-};

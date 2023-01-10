@@ -1,5 +1,3 @@
-/*
- */
 package main
 
 import (
@@ -13,6 +11,9 @@ import (
 	"os/exec"
 	"runtime"
 )
+
+const CLUSTER1 = "cluster1"
+const CLUSTER2 = "cluster2"
 
 var kub k8s
 
@@ -52,28 +53,31 @@ func configure() {
 
 	sudoValidateUser()
 
-	kub.kubecfg("cluster2")
-	minikubeSetProfile("cluster2")
+	kub.kubecfg(CLUSTER2)
+	minikubeSetProfile(CLUSTER2)
 
 	ipIngressMinikube := kub.getIngressMinikube()
 	log.Println("Minikube ingress ip:", ipIngressMinikube)
 
 	bind.updateK8sIngress(ipIngressMinikube)
 
-	nodeList, err1 := kub.core.Nodes().List(context.TODO(), metav1.ListOptions{})
-	if err1 != nil {
-		log.Fatal(err1)
+	nodeList, err := kub.core.Nodes().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	log.Println("Running init script on Minikube nodes")
 	for _, node := range nodeList.Items {
-		minikubeSsh(node.Name, "[ -f init.sh ] && sudo sh init.sh")
+		err := minikubeSsh(node.Name, "[ -f init.sh ] && sudo sh init.sh")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	log.Println("Creating storage on Minikube nodes")
 
-	createPv("cluster")
-	createPv("cluster2")
+	createPv(CLUSTER1)
+	createPv(CLUSTER2)
 
 	log.Println("Add Minikube IP route")
 	minikubeAddIpRoute()
@@ -90,7 +94,7 @@ func setIngress(argv []string) {
 
 	bind := Bind9{}
 
-	kub.kubecfg("cluster2")
+	kub.kubecfg(CLUSTER2)
 
 	namespace := argv[0]
 	svc := argv[1]
@@ -126,8 +130,12 @@ func createPv(ctx string) {
 			path := pv.Spec.Local.Path
 
 			if operator == "In" {
-				minikubeSsh(node,
+				err = minikubeSsh(node,
 					"sudo mkdir -p "+path)
+
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 	}
