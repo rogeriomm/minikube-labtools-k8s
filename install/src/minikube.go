@@ -59,9 +59,7 @@ func addIpRoute(subnet string, gateway string) {
 	//fmt.Println(string(out))
 }
 
-func minikubeAddIpRoute() {
-	ip := minikubeGetIp("cluster")
-	addIpRoute("10.112.0.0/12", ip)
-	ip = minikubeGetIp("cluster2")
-	addIpRoute("10.96.0.0/12", ip)
+func minikubeAddIpRoute(cluster string, subnet string) {
+	ip := minikubeGetIp(cluster)
+	addIpRoute(subnet, ip)
 }
