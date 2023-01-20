@@ -11,7 +11,7 @@ go build -o $GOPATH/bin/labtools-k8s
 
    * Alias
 ```shell
-alias lab="labtools-k8s set-context cluster && k9s --cluster cluster -A"
+alias lab1="labtools-k8s set-context cluster1 && k9s --cluster cluster1 -A"
 alias lab2="labtools-k8s set-context cluster2 && k9s --cluster cluster2 -A"
 ```
 

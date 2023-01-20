@@ -163,15 +163,6 @@ kubectl -n ingress-nginx get deployment ingress-nginx-controller -o yaml | grep 
 
    * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
 
-# Kubectl versions
-   * https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/
-   * https://faun.pub/using-different-kubectl-versions-with-multiple-kubernetes-clusters-a3ad8707b87b
-
-```shell
-version=1.18.14 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64/kubectl" -o kubectl-$version && chmod +x kubectl-$version 
-version=1.23.12 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64/kubectl" -o kubectl-$version && chmod +x kubectl-$version 
-```
-
 # DNS
 ```shell
 kubectx cluster
@@ -191,28 +182,6 @@ dig @10.96.0.10 www.google.com
 ```
 
 ## BIND configuration
-   * /usr/local/etc/bind/named.conf.local
-````text
-zone "worldl.xpt" in { // Domain name
-    type master; // Primary DNS
-    file "/usr/local/etc/bind/zones/db.worldl.xpt"; // Forward lookup file
-    allow-update { none; }; // Primary DNS
-};
-
-// Minikube DNS resolver to domain *.cluster.local"
-zone "cluster.local" in {
-   type forward;
-   forward only;
-   forwarders { 10.96.0.10; };
-};
-
-// Minikube DNS resolver to domain *.cluster1.local"
-zone "cluster1.local" in {
-   type forward;
-   forward only;
-   forwarders { 10.112.0.10; };
-}
-````
 
 
 # Kubernetes NFS Subdir External Provisioner
@@ -241,3 +210,4 @@ ps -Af | grep hyperkit
    * https://gist.github.com/loa/a88803c5678381eb515ab7f1241199a3: Minikube host networking integration
    * https://kubernetes.io/docs/concepts/storage/volumes/#local:
    * https://vocon-it.com/2018/12/31/kubernetes-6-https-applications-via-ingress-controller-on-minikube/: Kubernetes (6) – HTTPS Applications via Ingress Controller on Minikube 
+   * https://www.suse.com/support/kb/doc/?id=000016445: Name Resolution Problems with ".local" Domains
