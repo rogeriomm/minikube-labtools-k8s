@@ -12,8 +12,8 @@ KUBERNETES_VERSION_2="1.23.15"
 #
 #
 #
-CLUSTERS_DOMAIN="xpt" # |
-CLUSTER2="cluster2"      # |--> MUST be "cluster.local" ($CLUSTER2.$CLUSTERS_DOMAIN), see https://github.com/kubernetes/minikube/issues/15567
+CLUSTERS_DOMAIN="xpt"
+CLUSTER2="cluster2"
 CLUSTER1="cluster1"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
@@ -94,7 +94,7 @@ cluster1_create()
 cluster2_create()
 {
   minikube -p $CLUSTER2 config set cpus 22
-  minikube -p $CLUSTER2 config set memory 25g
+  minikube -p $CLUSTER2 config set memory 26g
   minikube -p $CLUSTER2 config set disk-size 100g
   minikube -p $CLUSTER2 config view
 
