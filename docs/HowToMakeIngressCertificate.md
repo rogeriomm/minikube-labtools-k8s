@@ -9,8 +9,7 @@ brew install cfssl
 cat <<EOF | cfssl genkey - | cfssljson -bare server
 {
   "hosts": [
-    "*.worldl.xpt",
-    "*.*.worldl.xpt"
+    "*.worldl.xpt"
   ],
   "CN": "system:node:my-pod.my-namespace.pod.cluster.local",
   "key": {
@@ -86,3 +85,6 @@ labtools-k8s configure
 # References
    * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
    * https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/: Manage TLS Certificates in a Cluster
+   * https://security.stackexchange.com/questions/6873/can-a-wildcard-ssl-certificate-be-issued-for-a-second-level-domain/40481#40481
+      * https://cheapsslsecurity.com/p/why-is-my-wildcard-ssl-not-working-on-a-second-level-subdomain/
+     
