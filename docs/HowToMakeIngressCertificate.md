@@ -1,5 +1,5 @@
 # Install CFSSL
-```commandline
+```shell
 brew install cfssl
 ```
 
@@ -25,6 +25,9 @@ cat <<EOF | cfssl genkey - | cfssljson -bare server
 }
 EOF
 ```
+   * Generated files
+      * server-key.pem
+      * server.csr
 
 # Create a Certificate Signing Request object to send to the Kubernetes API
 ```shell
@@ -63,15 +66,20 @@ kubectl get csr my-svc.my-namespace -o jsonpath='{.status.certificate}' \
 openssl x509 -in server.crt -noout -text
 ```
 
+   * Move certificates
+```shell
+mv server.crt server.csr server-key.pem ../install/scripts/ingress-certs
+```
+
 # Configure Minikube ingress 
 ```shell
-cd install/scripts/ingress-certs
+cd ../install/scripts/ingress-certs
 kubectl -n kube-system delete secret mkcert
 kubectl -n kube-system create secret tls mkcert --key server-key.pem --cert server.crt
-minikube addons configure ingress
-minikube addons disable ingress
-minikube addons enable ingress
-minikube-labtools-k8s configure
+echo "Enter custom cert: kube-system/mkcert" && minikube addons configure ingress
+minikube -p cluster2 addons disable ingress
+minikube -p cluster2 addons enable ingress
+labtools-k8s configure
 ```
   * On MACOS click on $MINIKUBE_HOME/ca.crt to add Minikube CA certificate on Keychain
 
