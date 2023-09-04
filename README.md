@@ -13,22 +13,29 @@
 # Install
 ## Install packages on MACOS
 ```shell
-brew install zsh minikube helm go kustomize cfssl
+brew install zsh minikube helm go kustomize cfssl yq k9s minio-mc
 ```
 
 ## Setup network/firewal on MACOS
    * Enable routing on MACOS
 ```shell
-sysctl -w net.inet.ip.forwarding=1
+sudo sysctl -w net.inet.ip.forwarding=1
 ```
    * Enable firewall, enable bind 
      * System preference/Security & Privacy/Firewall Options 
 
 ## Install Minikube TLS CA certificate on MACOS
-   * Go to directory "install/scripts/minikube-certs". Double-click ca.crt and add certificate on "System"
+   * Go to directory "install/scripts/minikube-certs". Double-click "ca.crt" file and add certificate on "System"
    * Open "Keychain Access", click on "System", double-click "minikubeCA". 
       * On "Trust" set "Always Trust"
    * [Keychain Access screenshot](docs/MacOsKeyChainMinikubeCA.png)
+
+## Install Minikube TLS CA certificate on Firefox
+   * On Firefox URL type: about:preferences#privacy
+      * Click "View Certificates"
+         * On tab "Authorities" click "Import"
+            * Select "ca.crt" file and click "Open"
+
 
 ### Conda Issue
    * https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/non-standard-certs.html: CONDA, Using non-standard certificates
@@ -56,13 +63,20 @@ write(2, "More details here: https://curl."..., 264More details here: https://cu
 
 ## Build and install management tool
 ```shell
-    mkdir -p $HOME/go
-    GOPATH="$HOME/go"
-    export PATH=$PATH:"$GOPATH/bin"
-    
-    cd install/src
-    go get
-    go install
+brew install golang
+```
+
+```shell
+GOPATH="$HOME/go"
+export PATH=$PATH:"$GOPATH/bin"
+```
+
+```shell
+mkdir -p $HOME/go
+
+cd install/src
+go get -u
+go install
 ```
 
 ## Configure MACOS NFS server
@@ -77,6 +91,15 @@ write(2, "More details here: https://curl."..., 264More details here: https://cu
 sudo nfsd enable
 sudo nfsd checkexports
 sudo nfsd restart
+```
+
+## NFS provisioner
+```shell
+kubectl get pods -n nfs-external-provisioner
+```
+
+```shell
+kubectl logs -n nfs-external-provisioner nfs-subdir-external-provisioner-bf56599bc-m4rrq
 ```
 
 # Kubernetes dashboard
@@ -136,6 +159,9 @@ minikube ip
 ping anything.worldl.xpt
 ```
 
+## Storage class
+   * https://kubernetes.io/docs/tasks/administer-cluster/change-default-storage-class/
+
 # Minikube Ingress TLS certificate
 ```shell
 kubectl -n kube-system delete secret mkcert
@@ -184,7 +210,7 @@ dig @10.96.0.10 www.google.com
 ## BIND configuration
 
 
-# Kubernetes NFS Subdir External Provisioner
+# Kubernetes NFS Sub-dir External Provisioner
 ## Uninstall
 ```shell
 helm list
@@ -197,6 +223,139 @@ helm uninstall nfs-subdir-external-provisioner
 ````shell
 ps -Af | grep hyperkit
 ````
+
+# Running on Linux
+
+   * Install brew: https://brew.sh/
+
+```text
+macos:/Users/rogermm/git /Users/rogermm/git nfs auto 0 0
+```
+
+   * /etc/exports
+```text
+/Users/rogermm/git -alldirs -maproot=rogermm 192.168.100.8
+```
+
+```shell
+sudo adduser --uid 501 --gid 20 mac
+```
+
+```shell
+sudo podman network rm minikube
+```
+
+```shell
+apt install curl git
+```
+   * https://asdf-vm.com/guide/getting-started.html#_3-install-asdf
+
+```shell
+export ASDF_DIR="$HOME/.asdf"
+. "$HOME/.asdf/asdf.sh"
+```
+
+   * https://snapcraft.io/install/kubectx/ubuntu
+```shell
+sudo snap install kubectx --classic
+```
+
+```shell
+wget https://github.com/ahmetb/kubectx/releases/download/v0.9.4/kubectx_v0.9.4_linux_x86_64.tar.gz
+tar -zxf kubectx_v0.9.4_linux_x86_64.tar.gz
+sudo install kubectx /usr/local/bin/
+
+wget https://github.com/ahmetb/kubectx/releases/download/v0.9.3/kubens_v0.9.3_linux_x86_64.tar.gz
+tar -zxf kubens_v0.9.3_linux_x86_64.tar.gz
+sudo install kubens /usr/local/bin
+
+```
+
+```shell
+minikube -p cluster2 service list
+```
+
+```text
+|----------------------|------------------------------------|--------------|---------------------------|
+|      NAMESPACE       |                NAME                | TARGET PORT  |            URL            |
+|----------------------|------------------------------------|--------------|---------------------------|
+| default              | kubernetes                         | No node port |                           |
+| ingress-nginx        | ingress-nginx-controller           | http/80      | http://192.168.12.2:31631 |
+|                      |                                    | https/443    | http://192.168.12.2:32188 |
+| ingress-nginx        | ingress-nginx-controller-admission | No node port |                           |
+| kube-system          | kube-dns                           | No node port |                           |
+| kube-system          | metrics-server                     | No node port |                           |
+| kube-system          | registry                           | No node port |                           |
+| kubernetes-dashboard | dashboard-metrics-scraper          | No node port |                           |
+| kubernetes-dashboard | kubernetes-dashboard               | No node port |                           |
+|----------------------|------------------------------------|--------------|---------------------------|
+```
+
+```shell
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
+```
+
+   * https://k9scli.io/topics/install/
+```shell
+sudo snap install k9s
+```
+
+```shell
+sudo apt install bind9-utils
+```
+
+## MAC OS configuration
+```shell
+sudo route -n add -net 192.168.11.0/24 192.168.100.8
+sudo route -n add -net 192.168.12.0/24 192.168.100.8
+```
+
+```shell
+netstat -anr | grep 192.168.11
+netstat -anr | grep 192.168.12
+```
+
+
+   * https://github.com/kubernetes/minikube/pull/9404: Add new flag "--ports" to expose ports for docker & podman drivers
+
+# Minikube
+```shell
+kubectx cluster1
+kubectl get node cluster1 -o jsonpath='{.status.capacity}'
+```
+
+```shell
+kubectx cluster2
+kubectl get node cluster2 -o jsonpath='{.status.capacity}'
+kubectl get node cluster2-m02 -o jsonpath='{.status.capacity}'
+kubectl get node cluster2-m03 -o jsonpath='{.status.capacity}'
+```
+
+# NFS
+```shell
+sudo nfsd status
+```
+
+```shell
+sudo nfsd enable
+sudo nfsd start
+```
+
+```shell
+sudo nfsd update
+```
+
+```shell
+showmount -e
+```
 
 # See also
    * [How to make ingress certificate](docs/HowToMakeIngressCertificate.md)
@@ -211,3 +370,4 @@ ps -Af | grep hyperkit
    * https://kubernetes.io/docs/concepts/storage/volumes/#local:
    * https://vocon-it.com/2018/12/31/kubernetes-6-https-applications-via-ingress-controller-on-minikube/: Kubernetes (6) – HTTPS Applications via Ingress Controller on Minikube 
    * https://www.suse.com/support/kb/doc/?id=000016445: Name Resolution Problems with ".local" Domains
+   * https://techexpertise.medium.com/minikube-multi-node-k8s-cluster-with-shared-nfs-mount-pv-cb3105f9a2c7: Minikube Multi-Node K8s Cluster with Shared NFS mount PV

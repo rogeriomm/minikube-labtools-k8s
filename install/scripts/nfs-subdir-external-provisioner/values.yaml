@@ -8,8 +8,8 @@ image:
 imagePullSecrets: []
 
 nfs:
-  server: host.minikube.internal
-  path: /Users/rogermm/nfs
+  server: macos.worldl.xpt
+  path: /Volumes/data/nfs
   mountOptions:
   volumeName: nfs-subdir-external-provisioner-root
   # Reclaim policy for the main nfs volume

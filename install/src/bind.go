@@ -2,36 +2,73 @@ package main
 
 import (
 	"bufio"
-	"log"
+	"github.com/bitfield/script"
 	"os"
-	"os/exec"
 	"regexp"
+	"runtime"
 )
 
-type Bind9 struct {
-	f *os.File
+type bind9 struct {
+	configPath  string
+	labBindPath string
+	f           *os.File
 }
 
-func (bind *Bind9) open() {
+func (bind *bind9) open() {
 	var err error
-	bind.f, err = os.OpenFile("/usr/local/etc/bind/zones/db.worldl.xpt", os.O_APPEND|os.O_RDWR, 0644)
+
+	if runtime.GOOS == "linux" {
+		bind.configPath = "/etc/bind"
+	} else if runtime.GOOS == "darwin" {
+		bind.configPath = "/usr/local/etc/bind"
+	}
+
+	if script.IfExists(bind.configPath).Error() != nil {
+		sugar.Fatal("BIND9 not installed")
+	}
+
+	bind.labBindPath = minikubeK8sPath + "/install/scripts/bind/" + runtime.GOOS
+
+	if script.IfExists(bind.configPath+"/zones").Error() != nil {
+		script.Exec("sudo chown -R mac /etc/bind").Stdout()
+		os.MkdirAll(bind.configPath+"/zones", 0777)
+	}
+
+	script.Exec("cp " + bind.labBindPath + "/zones/db.worldl.xpt " + bind.configPath + "/zones/").Stdout()
+
+	if runtime.GOOS == "linux" {
+		script.Exec("cp " + bind.labBindPath + "/named.conf.local " + bind.configPath).Stdout()
+		script.Exec("cp " + bind.labBindPath + "/named.conf.options " + bind.configPath).Stdout()
+	} else if runtime.GOOS == "darwin" {
+		script.Exec("cp " + bind.labBindPath + "/named.conf.local " + bind.configPath).Stdout()
+		script.Exec("cp " + bind.labBindPath + "/named.conf " + bind.configPath).Stdout()
+	}
+
+	// Validating Syntax of bind configuration and Zone files
+	script.Exec("named-checkconf " + bind.configPath + "/named.conf.local").Stdout()
+	script.Exec("named-checkconf " + bind.configPath + "/named.conf").Stdout()
+
+	script.Exec("named-checkzone xxx " + bind.configPath + "/zones/db.worldl.xpt").Stdout()
+
+	// Open configuration file
+	bind.f, err = os.OpenFile(bind.configPath+"/zones/db.worldl.xpt", os.O_APPEND|os.O_RDWR, 0644)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 }
 
-func (bind *Bind9) close() {
+func (bind *bind9) close() {
 	err := bind.f.Close()
 	if err != nil {
 		return
 	}
 }
 
-func (bind *Bind9) findBindZone(key string) bool {
+func (bind *bind9) findBindZone(key string) bool {
 	scanner := bufio.NewScanner(bind.f)
 	r, err := regexp.Compile(key)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 
 	for scanner.Scan() {
@@ -43,65 +80,66 @@ func (bind *Bind9) findBindZone(key string) bool {
 	return false
 }
 
-func (bind *Bind9) updateK8sIngress(ip string) {
+func (bind *bind9) updateK8sIngress(ip string) {
 	bind.open()
 	defer bind.close()
-	found := bind.findBindZone("\\$INCLUDE /usr/local/etc/bind/zones/ingress-k8s.worldl.xpt")
+	found := bind.findBindZone("\\$INCLUDE " + bind.configPath + "/zones/ingress-k8s.worldl.xpt")
 	if !found {
-		if _, err := bind.f.WriteString("$INCLUDE /usr/local/etc/bind/zones/ingress-k8s.worldl.xpt\n"); err != nil {
-			log.Fatal(err)
+		if _, err := bind.f.WriteString("$INCLUDE " + bind.configPath + "/zones/ingress-k8s.worldl.xpt\n"); err != nil {
+			sugar.Fatal(err)
 		}
 	}
 
-	f, err := os.OpenFile("/usr/local/etc/bind/zones/ingress-k8s.worldl.xpt", os.O_WRONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(bind.configPath+"/zones/ingress-k8s.worldl.xpt", os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	_, err = f.WriteString("*.worldl.xpt. IN A " + ip + "\n")
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 
 	err = f.Close()
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 }
 
-func (bind *Bind9) updateResolver(subDomain string, ip string) {
+func (bind *bind9) updateResolver(subDomain string, ip string) {
 	bind.open()
 	defer bind.close()
-	subDomainFile := "/usr/local/etc/bind/zones/" + subDomain + ".worldl.xpt"
+	subDomainFile := bind.configPath + "/zones/" + subDomain + ".worldl.xpt"
 	found := bind.findBindZone("\\$INCLUDE " + subDomainFile)
 	if !found {
 		if _, err := bind.f.WriteString("$INCLUDE " + subDomainFile + "\n"); err != nil {
-			log.Fatal(err)
+			sugar.Fatal(err)
 		}
 	}
 
 	f, err := os.OpenFile(subDomainFile, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	_, err = f.WriteString("*." + subDomain + ".worldl.xpt. IN A " + ip + "\n")
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	_, err = f.WriteString(subDomain + ".worldl.xpt. IN A " + ip + "\n")
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 	err = f.Close()
 	if err != nil {
-		log.Fatal(err)
+		sugar.Fatal(err)
 	}
 }
 
-func (bind *Bind9) restartBind() {
-	log.Println("Restarting BIND...")
-	_, err := exec.Command("sudo", "brew", "services", "restart", "bind").Output()
-	//log.Println(string(out))
-	if err != nil {
-		log.Fatal(err)
+func (bind *bind9) restartBind() {
+	sugar.Info("Restarting BIND...")
+
+	if runtime.GOOS == "linux" {
+		script.Exec("sudo systemctl restart bind9").Stdout()
+	} else if runtime.GOOS == "darwin" {
+		script.Exec("sudo brew services restart bind").Stdout()
 	}
 }

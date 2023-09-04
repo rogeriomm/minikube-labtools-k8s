@@ -24,6 +24,7 @@ cat <<EOF | cfssl genkey - | cfssljson -bare server
 }
 EOF
 ```
+
    * Generated files
       * server-key.pem
       * server.csr
