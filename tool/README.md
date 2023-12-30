@@ -1,11 +1,13 @@
 
    * Update modules
 ```shell
+cd src
 go get -u
 ```
 
    * Build
 ```shell
+cd src
 go build -o $GOPATH/bin/labtools-k8s
 ```
 
