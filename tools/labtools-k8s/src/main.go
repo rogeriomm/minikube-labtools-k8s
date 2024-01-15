@@ -361,7 +361,7 @@ func installNfsProvisioner() {
 
 	status, err = script.Exec(`helm install --namespace nfs-external-provisioner nfs-subdir-external-provisioner 
                               nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
-                               --values ` + minikubeK8sPath + `/install/scripts/nfs-subdir-external-provisioner/values.yaml `).Stdout()
+                               --values ` + minikubeK8sPath + `/install/scripts/helm/nfs-subdir-external-provisioner/values.yaml `).Stdout()
 	if err != nil {
 		sugar.Fatal(err, status)
 	}
