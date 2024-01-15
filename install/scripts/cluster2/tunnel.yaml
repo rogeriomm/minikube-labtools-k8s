@@ -1,5 +1,10 @@
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: "tunnel"
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: tunnel-server-conf
@@ -16,21 +21,11 @@ data:
         -N \
         -R 1080:localhost:1080 \
         -R 8888:localhost:8888 \
+        -R 2222:localhost:22 \
         -p 22 \
         -i /tmp/ssh/id_rsa \
         -o "StrictHostKeyChecking=no" \
         mac@macos.worldl.xpt \
-        
-        #echo "ssh internet gateway"
-        #autossh -f -M 0 \
-        #  -o "ServerAliveInterval 30" \
-        #  -o "ServerAliveCountMax 3" \
-        #  -N \
-        #  -R 192.168.100.199:8080:ingress.worldl.xpt:80 \
-        #  -p 22 \
-        #  -i /tmp/ssh/id_rsa \
-        #  -o "StrictHostKeyChecking=no" \
-        #  mac@gateway.worldl.xpt
     
        tail -f   "$HOME/autossh.log"
 ---
