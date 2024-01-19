@@ -147,3 +147,108 @@ spec:
   nfs:
     server: macos.worldl.xpt
     path: "/Volumes/data/git"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-volume-11
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-common
+  nfs:
+    server: macos.worldl.xpt
+    path: "/Volumes/data/git"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-volume-12
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-common
+  nfs:
+    server: macos.worldl.xpt
+    path: "/Volumes/data/git"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-volume-13
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-common
+  nfs:
+    server: macos.worldl.xpt
+    path: "/Volumes/data/git"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-volume-14
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-common
+  nfs:
+    server: macos.worldl.xpt
+    path: "/Volumes/data/git"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-volume-15
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-common
+  nfs:
+    server: macos.worldl.xpt
+    path: "/Volumes/data/git"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-volume-16
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-common
+  nfs:
+    server: macos.worldl.xpt
+    path: "/Volumes/data/git"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-volume-16
+spec:
+  capacity:
+    storage: 256Mi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs-common
+  nfs:
+    server: macos.worldl.xpt
+    path: "/Volumes/data/git"
