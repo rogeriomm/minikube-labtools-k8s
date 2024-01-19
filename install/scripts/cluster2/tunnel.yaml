@@ -62,7 +62,7 @@ spec:
             defaultMode: 0700
       containers:
         - name: tunnel-server-gateway
-          image: docker-command:latest
+          image: registry.minikube/command
           imagePullPolicy: Never
           #command: ["/bin/sh", "-c", "sleep 10000"]
           volumeMounts:
