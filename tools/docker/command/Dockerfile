@@ -4,7 +4,7 @@ USER root
 
 RUN apt update && \
     apt install -y tinyproxy dante-server bind9 autossh openssh-server \
-                   tcpdump bind9-dnsutils netcat nmap inetutils-ping socat \
+                   tcpdump bind9-dnsutils netcat nmap inetutils-ping socat proxychains \
                    sudo kitty apt-file \
                    htop zsh jq \
                    neovim nano \
