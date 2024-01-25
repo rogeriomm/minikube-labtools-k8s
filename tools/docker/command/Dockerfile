@@ -23,7 +23,7 @@ RUN cd /tmp && wget https://repo1.maven.org/maven2/io/trino/trino-cli/437/trino-
 
 RUN useradd -m tunnel &&  \
     chown -R tunnel:tunnel /home/tunnel/ && \
-    mkdir -p home/tunnel/.ssh/ && \
+    mkdir -p /home/tunnel/.ssh/ && \
     chmod -R go-rwx /home/tunnel/.ssh/ && \
     usermod tunnel -s /bin/bash && \
     chmod +x /start.sh
