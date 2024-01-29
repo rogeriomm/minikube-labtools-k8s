@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: "tunnel"
+  name: "commander"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: tunnel-server-conf
-  namespace: tunnel
+  namespace: commander
 data:
   start.sh: |
       export AUTOSSH_LOGFILE="$HOME/autossh.log"
@@ -33,7 +33,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tunnel-server
-  namespace: tunnel
+  namespace: commander
   labels:
     app.kubernetes.io/name: tunnel-server
 spec:
@@ -64,12 +64,10 @@ spec:
         - name: tunnel-server-gateway
           image: registry.minikube/command
           imagePullPolicy: Never
-          #command: ["/bin/sh", "-c", "sleep 10000"]
           volumeMounts:
             - name: tunnel-conf
               readOnly: true
               mountPath: /tmp/conf
-            # kubectl create -n tunnel secret generic ssh --from-file=id_rsa=~/.ssh/id_rsa_tunnel
             - name: ssh
               readOnly: true
               mountPath: "/tmp/ssh"

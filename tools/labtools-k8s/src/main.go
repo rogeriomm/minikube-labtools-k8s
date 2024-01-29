@@ -25,8 +25,8 @@ const Cluster2SvcSubnet = "10.96.0.0/12"
 
 const ClustersDomain = "xpt"
 
-const KubernetesVersion1 = "1.28.3"
-const KubernetesVersion2 = "1.28.3"
+const KubernetesVersion1 = "1.28.6"
+const KubernetesVersion2 = "1.28.6"
 
 var kub1 = k8s{ctx: Cluster1}
 var kub2 = k8s{ctx: Cluster2}
