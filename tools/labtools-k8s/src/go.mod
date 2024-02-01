@@ -11,7 +11,7 @@ require (
 	github.com/otiai10/copy v1.14.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/pkg/errors v0.9.1
-	github.com/shirou/gopsutil/v3 v3.23.12
+	github.com/shirou/gopsutil/v3 v3.24.1
 	go.uber.org/zap v1.26.0
 	k8s.io/api v0.29.1
 	k8s.io/apimachinery v0.29.1
