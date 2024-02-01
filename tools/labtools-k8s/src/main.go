@@ -259,13 +259,16 @@ func startCluster2() {
 	case "linux":
 		osStr = `--driver='docker'`
 	case "darwin":
-		osStr = `--driver='docker'`
+		osStr = `--driver='docker' --container-runtime='containerd'`
 	}
 
 	cmd := `minikube -p ` + mkb2.profile + ` start
 	--kubernetes-version="v` + KubernetesVersion2 + `" 
 	--dns-domain="` + mkb2.profile + `.` + ClustersDomain + `" 
-	--extra-config=kubelet.max-pods=150
+    --extra-config=kubelet.system-reserved=cpu=500m,memory=500Mi 
+	--extra-config=kubelet.kube-reserved=cpu=500m,memory=500Mi
+	--extra-config=kubelet.max-pods=250
+    --memory=no-limit
 	--nodes 4
 	--insecure-registry "192.168.0.0/16,10.0.0.0/8"
 	--service-cluster-ip-range='` + Cluster2SvcSubnet + `' ` + `--cache-images=true ` +
@@ -290,12 +293,13 @@ func startCluster1() {
 	case "linux":
 		osStr = `--driver='docker'`
 	case "darwin":
-		osStr = `--driver='docker'`
+		osStr = `--driver='docker' --container-runtime='containerd'`
 	}
 
 	cmd := `minikube -p ` + mkb1.profile + ` start
 	--kubernetes-version="v` + KubernetesVersion1 + `" 
 	--dns-domain="` + mkb1.profile + `.` + ClustersDomain + `" 
+    --extra-config=kubelet.max-pods=250
 	--nodes 1
 	--insecure-registry "192.168.0.0/16,10.0.0.0/8"
 	--service-cluster-ip-range='` + Cluster1SvcSubnet + `' ` + `--cache-images=true ` +
