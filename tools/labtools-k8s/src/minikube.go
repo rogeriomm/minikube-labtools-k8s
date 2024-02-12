@@ -55,6 +55,15 @@ func (m *minikube) applyProfile() {
 	}
 }
 
+func (m *minikube) configure() error {
+	ip := m.getIp()
+
+	_, err := exec.Command("sudo", "ifconfig",
+		"en0", "alias", ip, "255.255.255.0").Output()
+
+	return err
+}
+
 func (m *minikube) start() error {
 	sugar.Info("Minikube " + m.profile + ": start")
 
@@ -67,13 +76,7 @@ func (m *minikube) start() error {
 	err := proc.Run()
 
 	if err == nil {
-		ip := m.getIp()
-
-		_, err = exec.Command("sudo", "ifconfig",
-			"en0", "alias", ip, "255.255.255.0").Output()
-		if err == nil {
-			_, err = exec.Command("sudo", "pfctl", "-e").Output()
-		}
+		err = m.configure()
 	}
 
 	return err
