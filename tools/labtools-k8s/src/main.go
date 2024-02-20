@@ -265,9 +265,10 @@ func startCluster2() {
 	//--disable-optimizations=true disables optimizations that are set for local Kubernetes.
 	//Including decreasing CoreDNS replicas from 2 to 1 and increasing kubeadm housekeeping-interval from 10s to 5m
 	cmd := `minikube -p ` + mkb2.profile + ` start
-    --disable-optimizations=true
+    --cni calico
 	--kubernetes-version="v` + KubernetesVersion2 + `" 
-	--dns-domain="` + mkb2.profile + `.` + ClustersDomain + `" 
+	--dns-domain="` + mkb2.profile + `.` + ClustersDomain + `"
+    --extra-config=kubelet.housekeeping-interval=10s
     --extra-config=kubelet.system-reserved=cpu=500m,memory=500Mi 
 	--extra-config=kubelet.kube-reserved=cpu=500m,memory=500Mi
 	--extra-config=kubelet.max-pods=250
@@ -306,10 +307,11 @@ func startCluster1() {
 	}
 
 	cmd := `minikube -p ` + mkb1.profile + ` start
-    --disable-optimizations=true
+    --cni calico
 	--kubernetes-version="v` + KubernetesVersion1 + `" 
 	--dns-domain="` + mkb1.profile + `.` + ClustersDomain + `" 
     --extra-config=kubelet.max-pods=250
+    --extra-config=kubelet.housekeeping-interval=120s
 	--nodes 1
 	--insecure-registry "192.168.0.0/16,10.0.0.0/8"
 	--service-cluster-ip-range='` + Cluster1SvcSubnet + `' ` + `--cache-images=true ` +
