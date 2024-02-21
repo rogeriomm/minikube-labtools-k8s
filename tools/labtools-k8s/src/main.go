@@ -38,6 +38,15 @@ var minikubeK8sPath string
 var minikubeHomePath string
 var sugar *zap.SugaredLogger
 
+func configureBind() {
+	kub2.connect()
+	ip := kub2.getIngressMinikube()
+	sugar.Info("Minikube ingress ip: ", ip)
+	bind.updateK8sIngress(ip)
+	bind.restartBind()
+	flushDnsCache()
+}
+
 func configureClusters() {
 	sugar.Info("Configure clusters")
 
@@ -66,17 +75,7 @@ func configureClusters() {
 
 	kub2.useContext()
 
-	err = kub2.createNamespace("argocd")
-	if err != nil {
-		sugar.Fatal(err)
-	}
-
 	err = kub2.createNamespace("nfs-external-provisioner")
-	if err != nil {
-		sugar.Fatal(err)
-	}
-
-	err = kub2.createNamespace("tunnel")
 	if err != nil {
 		sugar.Fatal(err)
 	}
@@ -108,8 +107,7 @@ func configureClusters() {
 	addPodRoute(&mkb1, &kub1)
 	addPodRoute(&mkb2, &kub2)
 
-	bind.restartBind()
-	flushDnsCache()
+	configureBind()
 
 	mkb1.setDockerEnv()
 }
@@ -288,6 +286,8 @@ func startCluster2() {
 	mkb2.addonEnable([]string{"metrics-server", "ingress", "dashboard",
 		"metallb", "storage-provisioner"}, true)
 	mkb2.addonEnable([]string{"ingress-dns", "registry", "registry-aliases"}, false)
+
+	configureBind()
 
 	err = mkb2.configure()
 
@@ -572,10 +572,12 @@ func main() {
 		}
 		setContext(args[1])
 	case "destroy-clusters":
+		sudoValidateUser()
 		destroyClusters()
 	case "create-clusters":
 		createClusters()
 	case "initialize-clusters":
+		sudoValidateUser()
 		initializeClusters()
 	case "show-clusters-configuration":
 		showClustersConfiguration()
