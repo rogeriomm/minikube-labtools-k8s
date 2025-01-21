@@ -122,6 +122,9 @@ def main() -> int:
     with open('/etc/resolver/worldl.xpt', 'w') as f:
         f.write("nameserver 127.0.0.1")
 
+    with open('/usr/local/etc/dnsmasq.conf', 'w') as f:
+        f.write("listen-address=0.0.0.0")
+
     # Reload Dnsmasqd configuration and clear cache
     assert os.system("sudo brew services restart dnsmasq") == 0
     assert os.system("dscacheutil -flushcache") == 0
