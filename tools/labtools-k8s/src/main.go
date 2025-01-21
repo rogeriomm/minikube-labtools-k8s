@@ -284,6 +284,12 @@ func startCluster2() {
 	mkb2.addonEnable([]string{"metrics-server", "ingress", "dashboard",
 		"metallb", "storage-provisioner"}, true)
 	mkb2.addonEnable([]string{"ingress-dns", "registry", "registry-aliases"}, false)
+
+	err = mkb2.configure()
+
+	if err != nil {
+		sugar.Fatal(err)
+	}
 }
 
 func startCluster1() {
@@ -313,6 +319,12 @@ func startCluster1() {
 	}
 
 	mkb1.addonEnable([]string{"metrics-server", "dashboard"}, true)
+
+	err = mkb1.configure()
+
+	if err != nil {
+		sugar.Fatal(err)
+	}
 }
 
 func createClusters() {
