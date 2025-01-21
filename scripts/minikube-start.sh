@@ -1,4 +1,9 @@
 #!/bin/zsh
-minikube start
-minikube docker-env > ~/.minikube/docker-env
+
+minikube -p cluster2 start 
+
+minikube -p cluster  start
+minikube -p cluster docker-env > ~/.minikube/docker-env
+
+minikube profile cluster2
 
