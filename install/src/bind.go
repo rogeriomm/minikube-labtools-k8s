@@ -57,8 +57,15 @@ func (bind *Bind9) updateK8sIngress(ip string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	f.WriteString("*.worldl.xpt. IN A " + ip + "\n")
-	f.Close()
+	_, err = f.WriteString("*.worldl.xpt. IN A " + ip + "\n")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = f.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (bind *Bind9) updateResolver(subDomain string, ip string) {
@@ -76,11 +83,18 @@ func (bind *Bind9) updateResolver(subDomain string, ip string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	f.WriteString("*." + subDomain + ".worldl.xpt. IN A " + ip)
-	f.WriteString("\n")
-	f.WriteString(subDomain + ".worldl.xpt. IN A " + ip)
-	f.WriteString("\n")
-	f.Close()
+	_, err = f.WriteString("*." + subDomain + ".worldl.xpt. IN A " + ip + "\n")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = f.WriteString(subDomain + ".worldl.xpt. IN A " + ip + "\n")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = f.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (bind *Bind9) restartBind() {
