@@ -1,8 +1,7 @@
 # https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
 # brew install docker-credential-helper
 
-# Last stable kubernetes version supported by RANCHER 2.6
-KUBERNETES_VERSION="1.23.3"
+KUBERNETES_VERSION="1.22.13"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
@@ -59,6 +58,13 @@ clusters_start()
 {
   set -x
   set -e
+
+  ip="192.168.100.250" # FIXME
+
+  if ! dig @$ip www.google.com; then
+    echo "Local DNS server not working"
+    exit 1
+  fi
 
   minikube -p cluster2 start --embed-certs
 
@@ -158,7 +164,7 @@ create_mounts()
 {
   {
     echo "# Added by script #"
-    echo "host.minikube.internal:/Users/${USERNAME}/git /Users/${USERNAME}/git nfs defaults 0 0"
+    echo "host.minikube.internal:/Users/${USERNAME}/git /Users/${USERNAME}/git nfs nfsvers=3 0 0"
     echo "###################"
   } >> "${MINIKUBE_ETC}/fstab"
 }
