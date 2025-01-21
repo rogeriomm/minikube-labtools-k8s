@@ -44,7 +44,7 @@ storageClass:
   # Ignored if value not set.
   onDelete:
 
-  # Specifies a template for creating a directory path via PVC metadata's such as labels, annotations, name or namespace.
+  # Specifies a template for creating a directory path via PVC metadata such as labels, annotations, name or namespace.
   # Ignored if value not set.
   pathPattern:
 
