@@ -1,0 +1,20 @@
+name: Docker image command
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'tools/docker/**'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build command
+      working-directory: ./tools/docker/command
+      run: docker build . --tag command
