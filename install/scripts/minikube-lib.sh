@@ -7,8 +7,8 @@
 # NewestKubernetesVersion = "v1.25.2"
 # OldestKubernetesVersion = "v1.16.0"
 #
-KUBERNETES_VERSION_1="1.18.14"
-KUBERNETES_VERSION_2="1.23.12"
+KUBERNETES_VERSION_1="1.23.15"
+KUBERNETES_VERSION_2="1.23.15"
 #
 #
 #
@@ -28,12 +28,23 @@ minikube_check_config()
 
 install_kubectl()
 {
-  if ! which asdf ; then
-    brew install asdf
+  if ! brew services  info bind ; then
+     brew install bind 
+     sudo brew services start bind
   fi
 
-  asdf install kubectl $KUBERNETES_VERSION_1
-  asdf install kubectl $KUBERNETES_VERSION_2
+  if ! which helm ; then
+     brew install helm
+  fi
+
+  # brew install helm
+  if ! which asdf ; then
+    brew install asdf
+
+    asdf plugin-add kubectl https://github.com/asdf-community/asdf-kubectl.git
+    asdf install kubectl $KUBERNETES_VERSION_1
+    asdf install kubectl $KUBERNETES_VERSION_2
+  fi
 
   if ! which kubectx ; then
     brew install kubectx
@@ -49,6 +60,10 @@ install_kubectl()
 
   if ! which minikube ; then
     brew install minikube
+  fi
+
+  if ! kubectl krew ; then
+    brew install krew
   fi
 }
 
@@ -124,11 +139,11 @@ clusters_start()
     exit 1
   fi
 
-  minikube -p cluster2 start --embed-certs
-
-  minikube -p cluster start --embed-certs
+  minikube -p cluster start --embed-certs --wait=all
   minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
   source "$MINIKUBE_HOME"/docker-env
+
+  minikube -p cluster2 start --embed-certs --wait=all
 
   minikube profile cluster2
 }
@@ -294,9 +309,9 @@ init()
   internal_registry_setup
 
   # Set current minikube profile
+  asdf global kubectl $KUBERNETES_VERSION_2
   minikube profile cluster2
   kubectx cluster2
-  asdf global kubectl $KUBERNETES_VERSION_2
 
   # Setup Kubernetes NFS Subdir External Provisioner
   k8s_nfs_provisioner_setup
@@ -313,8 +328,8 @@ init()
   #rancher_setup
 
   # Apply yaml files on cluster #1
-  kubectx cluster
   asdf global kubectl $KUBERNETES_VERSION_1
+  kubectx cluster
 
   kubectl apply -f yaml1/
 

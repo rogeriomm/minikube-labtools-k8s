@@ -13,7 +13,7 @@ sudo -v
 echo "Checking Minikube DNS"
 
 if ! dig @192.168.64.1 www.google.com; then
-  echo 'Check MACOS firewall. Add "named" firewall rule and restart named'
+  echo 'Check MACOS firewall. Add "named" firewall rule and restart named: "sudo brew services restart bind"'
   exit 2
 fi
 
