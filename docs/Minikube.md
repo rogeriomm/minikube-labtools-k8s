@@ -1,3 +1,4 @@
+# Host tunneling
    * /etc/pf.conf
 ```text
 #
@@ -27,7 +28,7 @@
 scrub-anchor "com.apple/*"
 nat-anchor "com.apple/*"
 rdr pass on lo0 inet proto tcp from any to any port 80  -> 127.0.0.1 port 8080
-rdr pass on lo0 inet proto tcp from any to any port 443 -> 127.0.0.1 port 8081
+rdr pass on lo0 inet proto tcp from any to any port 443 -> 127.0.0.1 port 8443
 rdr-anchor "com.apple/*"
 dummynet-anchor "com.apple/*"
 anchor "com.apple/*"
@@ -374,11 +375,15 @@ docker inspect cluster2 | jq
 
 ```shell
 SSH_PORT=50571
-ssh -p $SSH_PORT -i /Volumes/data/.minikube/machines/cluster2/id_rsa docker@localhost -L 8080:192.168.49.2:80 -L 8081:192.168.49.2:443
+ssh -p $SSH_PORT -i /Volumes/data/.minikube/machines/cluster2/id_rsa docker@localhost -L 8080:192.168.49.2:80 -L 8443:192.168.49.2:443
 ```
 
 ```shell
-ssh -p 50571 -i /Volumes/data/.minikube/machines/cluster2/id_rsa docker@localhost -L 8080:192.168.49.2:80 -L 8081:192.168.49.2:443
+nc -v localhost 8080
+```
+
+```shell
+nc -v localhost 8443
 ```
 
 ```shell
@@ -394,4 +399,40 @@ minikube -p cluster2 ip
 ```
 ```text
 192.168.49.2
+```
+
+# DNS
+```shell
+kubectl -n kube-system get services kube-dns
+```
+```text
+NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE
+kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP,9153/TCP   4d1h
+```
+
+```shell
+minikube -p cluster2 ssh dig @10.96.0.10 kube-dns.kube-system.svc.cluster2.xpt
+```
+```text
+; <<>> DiG 9.18.18-0ubuntu0.22.04.1-Ubuntu <<>> @10.96.0.10 kube-dns.kube-system.svc.cluster2.xpt
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 14924
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: c2809479940377b5 (echoed)
+;; QUESTION SECTION:
+;kube-dns.kube-system.svc.cluster2.xpt. IN A
+
+;; ANSWER SECTION:
+kube-dns.kube-system.svc.cluster2.xpt. 28 IN A  10.96.0.10
+
+;; Query time: 0 msec
+;; SERVER: 10.96.0.10#53(10.96.0.10) (UDP)
+;; WHEN: Mon Feb 05 21:49:11 UTC 2024
+;; MSG SIZE  rcvd: 131
 ```
