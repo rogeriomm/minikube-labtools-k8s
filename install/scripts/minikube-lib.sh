@@ -4,14 +4,17 @@
 #
 # https://minikube.sigs.k8s.io/docs/handbook/config/#selecting-a-kubernetes-version
 # https://github.com/kubernetes/minikube/blob/master/pkg/minikube/constants/constants.go
-# NewestKubernetesVersion = "v1.25.2"
+# NewestKubernetesVersion = "v1.25.3"
 # OldestKubernetesVersion = "v1.16.0"
 #
 KUBERNETES_VERSION_1="1.23.15"
-KUBERNETES_VERSION_2="1.23.15"
+KUBERNETES_VERSION_2="1.25.3"
 #
 #
 #
+CLUSTERS_DOMAIN="xpt" # |
+CLUSTER2="cluster2"      # |--> MUST be "cluster.local" ($CLUSTER2.$CLUSTERS_DOMAIN), see https://github.com/kubernetes/minikube/issues/15567
+CLUSTER1="cluster1"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
@@ -62,60 +65,56 @@ install_kubectl()
     brew install minikube
   fi
 
-  if ! kubectl krew ; then
+  if ! kubectl krew > /dev/null ; then
     brew install krew
   fi
 }
 
 cluster1_create()
 {
-  PROFILE=cluster
-
-  minikube -p $PROFILE config set cpus 4
-  minikube -p $PROFILE config set memory 16g
-  minikube -p $PROFILE config set disk-size 130g
-  minikube -p $PROFILE config view
+  minikube -p $CLUSTER1 config set cpus 4
+  minikube -p $CLUSTER1 config set memory 16g
+  minikube -p $CLUSTER1 config set disk-size 130g
+  minikube -p $CLUSTER1 config view
 
   # 0x0a 0x70 0x00 0x00
-  minikube -p $PROFILE start \
+  minikube -p $CLUSTER1 start \
            --kubernetes-version="v${KUBERNETES_VERSION_1}" \
            --service-cluster-ip-range='10.112.0.0/12' \
-           --dns-domain='cluster1.local' \
+           --dns-domain="$CLUSTER1.$CLUSTERS_DOMAIN" \
            --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
-  minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
+  minikube -p $CLUSTER1 docker-env > "$MINIKUBE_HOME"/docker-env
 
   source "$MINIKUBE_HOME"/docker-env
 }
 
 cluster2_create()
 {
-  PROFILE=cluster2
-
-  minikube -p $PROFILE config set cpus 22
-  minikube -p $PROFILE config set memory 25g
-  minikube -p $PROFILE config set disk-size 100g
-  minikube -p $PROFILE config view
+  minikube -p $CLUSTER2 config set cpus 22
+  minikube -p $CLUSTER2 config set memory 25g
+  minikube -p $CLUSTER2 config set disk-size 100g
+  minikube -p $CLUSTER2 config view
 
   # 0x0a 0x60 0x00 0x00
-  minikube -p $PROFILE start \
+  minikube -p $CLUSTER2 start \
            --kubernetes-version="v${KUBERNETES_VERSION_2}" \
            --service-cluster-ip-range='10.96.0.0/12' \
-           --dns-domain='cluster.local' \
+           --dns-domain="$CLUSTER2.$CLUSTERS_DOMAIN" \
            --extra-config=kubelet.max-pods=100 \
            --nodes 3 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
-  minikube -p $PROFILE addons enable ingress
-  minikube -p $PROFILE addons disable ingress-dns
-  minikube -p $PROFILE addons enable registry
-  minikube -p $PROFILE addons enable registry-aliases
-  minikube -p $PROFILE addons enable dashboard
-  minikube -p $PROFILE addons enable metrics-server
-  minikube -p $PROFILE addons disable registry-creds
-  minikube -p $PROFILE addons enable metallb
-  minikube -p $PROFILE addons disable storage-provisioner
+  minikube -p $CLUSTER2 addons enable ingress
+  minikube -p $CLUSTER2 addons disable ingress-dns
+  minikube -p $CLUSTER2 addons enable registry
+  minikube -p $CLUSTER2 addons enable registry-aliases
+  minikube -p $CLUSTER2 addons enable dashboard
+  minikube -p $CLUSTER2 addons enable metrics-server
+  minikube -p $CLUSTER2 addons disable registry-creds
+  minikube -p $CLUSTER2 addons enable metallb
+  minikube -p $CLUSTER2 addons disable storage-provisioner
 
-  minikube -p $PROFILE addons list
+  minikube -p $CLUSTER2 addons list
 
   cp minikube-certs/{ca.crt,ca.key,ca.pem,cert.pem,key.pem} "$MINIKUBE_HOME"
 }
@@ -123,8 +122,8 @@ cluster2_create()
 clusters_stop()
 {
   rm -f "$MINIKUBE_HOME"/docker-env
-  minikube -p cluster stop
-  minikube -p cluster2 stop
+  minikube -p $CLUSTER1 stop
+  minikube -p $CLUSTER2 stop
 }
 
 clusters_start()
@@ -134,20 +133,20 @@ clusters_start()
 
   check_dns
 
-  minikube -p cluster start --embed-certs --wait=all
-  minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
+  minikube -p $CLUSTER1 start --embed-certs --wait=all
+  minikube -p $CLUSTER1 docker-env > "$MINIKUBE_HOME"/docker-env
   source "$MINIKUBE_HOME"/docker-env
 
-  minikube -p cluster2 start --embed-certs --wait=all
+  minikube -p $CLUSTER2 start --embed-certs --wait=all
 
-  minikube profile cluster2
+  minikube profile $CLUSTER2
 }
 
 clusters_post_start()
 {
   labtools-k8s configure
 
-  kubectx cluster2
+  kubectx $CLUSTER2
   asdf global kubectl $KUBERNETES_VERSION_2
 
   argocd_show_password
@@ -174,7 +173,7 @@ init_ingress()
 
 argocd_setup()
 {
-  kubectx cluster2
+  kubectx $CLUSTER2
   kubectl create namespace argocd
   kubectl apply -n argocd -f yaml2/argocd-install.yaml
   kubectl apply -f yaml2/argocd-ingress.yaml
@@ -182,7 +181,7 @@ argocd_setup()
 
 argocd_show_password()
 {
-  kubectx cluster2
+  kubectx $CLUSTER2
 
   while : ; do
     kubectl -n argocd get secret/argocd-initial-admin-secret 2> /dev/null > /dev/null && break
@@ -197,12 +196,12 @@ argocd_show_password()
 
 internal_registry_setup()
 {
-  # Configure docker internal registry
-  kubectx cluster # Our docker engine used by MAC OS
+  # Configure docker internal registry. https://github.com/kameshsampath/minikube-helpers
+  kubectx $CLUSTER1 # Our docker engine used by MAC OS
   kubectl -n kube-system delete configmap registry-cluster || echo -n
   kubectl -n kube-system create configmap registry-cluster \
                   --from-literal=registryAliases=registry.minikube \
-                  --from-literal=registryServiceHost="$(minikube -p cluster2 ip)" # Internal registry
+                  --from-literal=registryServiceHost="$(minikube -p $CLUSTER2 ip)" # Internal registry
   kubectl -n kube-system apply -f yaml2/node-etc-hosts-update.yaml
 }
 
@@ -266,6 +265,7 @@ check_dns()
 
 check_post_dns()
 {
+  check_dns
   # Check local ingress DNS name
   ip_dns=$(dig +short xxxxx.worldl.xpt)
   ip_minikube=$(minikube ip)
@@ -305,8 +305,8 @@ init()
   install_kubectl
 
   # Delete all clusters
-  minikube -p cluster delete
-  minikube -p cluster2 delete
+  minikube -p $CLUSTER1 delete
+  minikube -p $CLUSTER2 delete
 
   # Delete all files from Minikube home
   rm -rf "$MINIKUBE_HOME"
@@ -329,8 +329,8 @@ init()
 
   # Set current minikube profile
   asdf global kubectl $KUBERNETES_VERSION_2
-  minikube profile cluster2
-  kubectx cluster2
+  minikube profile $CLUSTER2
+  kubectx $CLUSTER2
 
   # Setup Kubernetes NFS Subdir External Provisioner
   k8s_nfs_provisioner_setup
@@ -348,7 +348,7 @@ init()
 
   # Apply yaml files on cluster #1
   asdf global kubectl $KUBERNETES_VERSION_1
-  kubectx cluster
+  kubectx $CLUSTER1
 
   kubectl apply -f yaml1/
 
