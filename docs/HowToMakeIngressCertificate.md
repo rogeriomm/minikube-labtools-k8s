@@ -69,4 +69,5 @@ minikube-labtools-k8s configure
 * On MACOS click on ca.crt to add certificate on Keychain
 
 # References
+   * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
    * https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/: Manage TLS Certificates in a Cluster

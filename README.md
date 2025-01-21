@@ -152,7 +152,7 @@ kubectl -n ingress-nginx get deployment ingress-nginx-controller -o yaml | grep 
    * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
 
 # See also
-   * [Certificates](docs/Certificates.md)
+   * [Certificates](docs/HowToMakeIngressCertificate.md)
    * [Jetbrains](docs/Jetbrains.md)
 
 # References
