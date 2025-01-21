@@ -1,0 +1,211 @@
+
+#
+# Standard storage
+#
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0001
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0001
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0002
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0002
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0003
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0003
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0004
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0004
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0005
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0005
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0006
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0006
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0007
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0007
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0008
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0008
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0009
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0009
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster
