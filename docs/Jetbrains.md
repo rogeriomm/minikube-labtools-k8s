@@ -1,8 +1,16 @@
-   * Add Minikube Ca certificate using script
-```text
-Run script "install/scripts/jetbrains-add-certificate.sh" or
+# Add CA certificate
+   * Add Minikube CA certificate using script
+```commandline
+cd install/scripts
+./jetbrains-manual-add-certificate.sh
 ```
 
-   * Add Minikube Ca certificate using Jetbrains GUI Preferences/Tools/Server Certificates
-      * Certificate located on "$MINIKUBE_HOME/ca.crt" or on repository "install/scripts/minikube-certs/ca.crt" 
-![alt text](JetbrainsCertificate.png "Title")
+```commandline
+cd install/scripts
+./jetbrains-toolbox-add-certificate.sh
+```
+
+   * Add Minikube CA certificate using Jetbrains GUI "Preferences/Tools/Server Certificates"
+      * Certificate located on "$MINIKUBE_HOME/ca.crt" or repository "install/scripts/minikube-certs/ca.crt" 
+
+<img src="JetbrainsCertificate.png" width="800">

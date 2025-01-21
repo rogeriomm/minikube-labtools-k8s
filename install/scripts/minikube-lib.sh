@@ -7,7 +7,7 @@ KUBERNETES_VERSION="1.22.3"
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
 MINIKUBE_ETC=$MINIKUBE_FILES/etc
-MINIKUBE_CERTS=$MINIKUBE_FILES/certs
+#MINIKUBE_CERTS=$MINIKUBE_FILES/certs
 
 cluster1_create()
 {
@@ -112,7 +112,7 @@ internal_registry_setup()
   kubectl -n kube-system delete configmap registry-cluster || echo -n
   kubectl -n kube-system create configmap registry-cluster \
                   --from-literal=registryAliases=registry.minikube \
-                  --from-literal=registryServiceHost=$(minikube -p cluster2 ip) # Internal registry
+                  --from-literal=registryServiceHost="$(minikube -p cluster2 ip)" # Internal registry
   kubectl -n kube-system apply -f yaml/node-etc-hosts-update.yaml
 }
 
@@ -166,11 +166,11 @@ are_you_sure()
 {
   # shellcheck disable=SC1049
   if [ "$1" = "" ]; then
-    read -q "REPLY?Initialize Minikube(y/n)? "
+    read -r -q "REPLY?Initialize Minikube(y/n)? "
   else
-    read -q "REPLY?$1(y/n)? "
+    read -r -q "REPLY?$1(y/n)? "
   fi
-  echo "\n"
+  printf "\n"
 
   if [ "$REPLY" = "n" ]; then
     exit
