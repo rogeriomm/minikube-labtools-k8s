@@ -16,6 +16,7 @@ COPY files /
 
 RUN useradd -m tunnel &&  \
     chown -R tunnel:tunnel /home/tunnel/ && \
+    mkdir /home/tunnel/.ssh/ && \
     chmod -R go-rwx /home/tunnel/.ssh/ && \
     usermod tunnel -s /bin/bash && \
     chmod +x /start.sh
