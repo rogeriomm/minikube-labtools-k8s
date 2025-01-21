@@ -53,25 +53,6 @@ func (bind *Bind9) findBindZone(key string) bool {
 	return false
 }
 
-func (bind *Bind9) updateZeppelinIngress(ip string) {
-	bind.open()
-	defer bind.close()
-	found := bind.findBindZone("\\$INCLUDE /usr/local/etc/bind/zones/zeppelin.worldl.xpt")
-	if !found {
-		if _, err := bind.f.WriteString("$INCLUDE /usr/local/etc/bind/zones/zeppelin.worldl.xpt\n"); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	f, err := os.OpenFile("/usr/local/etc/bind/zones/zeppelin.worldl.xpt", os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	f.WriteString("*.zeppelin.worldl.xpt. IN A " + ip + "\n")
-	f.WriteString("zeppelin.worldl.xpt. IN A " + ip + "\n")
-	f.Close()
-}
-
 func (bind *Bind9) updateK8sIngress(ip string) {
 	bind.open()
 	defer bind.close()
@@ -87,6 +68,26 @@ func (bind *Bind9) updateK8sIngress(ip string) {
 		log.Fatal(err)
 	}
 	f.WriteString("*.worldl.xpt. IN A " + ip + "\n")
+	f.Close()
+}
+
+func (bind *Bind9) updateResolver(subDomain string, ip string) {
+	bind.open()
+	defer bind.close()
+	subDomainFile := "/usr/local/etc/bind/zones/" + subDomain + ".worldl.xpt"
+	found := bind.findBindZone("\\$INCLUDE " + subDomainFile)
+	if !found {
+		if _, err := bind.f.WriteString("$INCLUDE " + subDomainFile + "\n"); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	f, err := os.OpenFile(subDomainFile, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	f.WriteString("*." + subDomain + ".worldl.xpt. IN A " + ip + "\n")
+	f.WriteString(subDomain + ".worldl.xpt. IN A " + ip + "\n")
 	f.Close()
 }
 
@@ -144,9 +145,8 @@ func (k *k8s) getIngressMinikube() string {
 	return ip
 }
 
-func (k *k8s) getIngressZeppelin() string {
-	svc, err := k.core.Services("zeppelin").Get(context.TODO(), "zeppelin-server",
-		metav1.GetOptions{})
+func (k *k8s) getSvcIp(namespace string, name string) string {
+	svc, err := k.core.Services(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 
 	if err != nil {
 		log.Fatal(err)
@@ -216,32 +216,21 @@ func sudoValidateUser() {
 	}
 }
 
-func main() {
-	k := &k8s{}
-	b := Bind9{}
+func configure() {
+	k8s := &k8s{}
+	bind := Bind9{}
 
-	log.Println("Minikube lab tool")
-	args := os.Args[1:]
-
-	if len(args) != 1 {
-		log.Println("Invalid argument")
-		return
-	}
-
-	if args[0] != "configure" {
-		log.Println("Invalid argument")
-		return
-	}
+	log.Println("Configure")
 
 	sudoValidateUser()
 
-	k.kubecfg()
-	ipIngressMinikube := k.getIngressMinikube()
+	k8s.kubecfg()
+	ipIngressMinikube := k8s.getIngressMinikube()
 	log.Println("Minikube ingress ip:", ipIngressMinikube)
 
-	b.updateK8sIngress(ipIngressMinikube)
+	bind.updateK8sIngress(ipIngressMinikube)
 
-	nodeList, err1 := k.core.Nodes().List(context.TODO(), metav1.ListOptions{})
+	nodeList, err1 := k8s.core.Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err1 != nil {
 		log.Fatal(err1)
 	}
@@ -267,4 +256,42 @@ func main() {
 
 	restartBind()
 	flushDnsCache()
+}
+
+func setIngress(namespace string, svc string, subDomain string) {
+	k8s := k8s{}
+	bind := Bind9{}
+
+	k8s.kubecfg()
+
+	log.Printf("Set ingress on service %s/%s, subdomain %s", namespace, svc, subDomain)
+	sudoValidateUser()
+	ip := k8s.getSvcIp(namespace, svc)
+	log.Printf("Update Bind to resolve *.%s.worldl.xpt to service %s/%s ip %s", subDomain, namespace, svc, ip)
+	bind.updateResolver(subDomain, ip)
+
+	restartBind()
+	flushDnsCache()
+}
+
+func main() {
+	log.Println("Minikube lab tool")
+	args := os.Args[1:]
+
+	if len(args) < 1 {
+		log.Println("Invalid argument")
+		return
+	}
+
+	if args[0] == "configure" {
+		configure()
+	} else if args[0] == "set-ingress" {
+		if len(args) != 4 {
+			fmt.Println(len(args))
+			log.Fatal("Invalid argument")
+		}
+		setIngress(args[1], args[2], args[3])
+	} else {
+		log.Fatal("Invalid argument")
+	}
 }
