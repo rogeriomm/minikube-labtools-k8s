@@ -78,7 +78,7 @@ cluster2_create()
   PROFILE=cluster2
 
   minikube -p $PROFILE config set cpus 22
-  minikube -p $PROFILE config set memory 80g
+  minikube -p $PROFILE config set memory 25g
   minikube -p $PROFILE config set disk-size 100g
   minikube -p $PROFILE config view
 
@@ -136,6 +136,9 @@ clusters_start()
 clusters_post_start()
 {
   labtools-k8s configure
+
+  kubectx cluster2
+  asdf global kubectl $KUBERNETES_VERSION_2
 
   argocd_show_password
 
@@ -309,7 +312,15 @@ init()
   # RANCHER setup
   #rancher_setup
 
+  # Apply yaml files on cluster #1
+  kubectx cluster
+  asdf global kubectl $KUBERNETES_VERSION_1
+
+  kubectl apply -f yaml1/
+
+  # Start cluster #1 & #2
   clusters_start
 
+  # Post start cluster #1 & #2
   clusters_post_start
 }
