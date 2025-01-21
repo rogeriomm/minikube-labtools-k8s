@@ -1,8 +1,17 @@
 # https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
 # brew install docker-credential-helper
 
+#
+# https://minikube.sigs.k8s.io/docs/handbook/config/#selecting-a-kubernetes-version
+# https://github.com/kubernetes/minikube/blob/master/pkg/minikube/constants/constants.go
+# NewestKubernetesVersion = "v1.25.2"
+# OldestKubernetesVersion = "v1.16.0"
+#
 KUBERNETES_VERSION_1="1.18.14"
 KUBERNETES_VERSION_2="1.23.12"
+#
+#
+#
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
@@ -12,8 +21,34 @@ MINIKUBE_ETC=$MINIKUBE_FILES/etc
 minikube_check_config()
 {
   if [ ! -d "$MINIKUBE_HOME" ]; then
-    echo "Invalid Minikube home directory "
+    echo "Invalid Minikube home directory: $MINIKUBE_HOME"
     exit 1
+  fi
+}
+
+install_kubectl()
+{
+  if ! which asdf ; then
+    brew install asdf
+  fi
+
+  asdf install kubectl $KUBERNETES_VERSION_1
+  asdf install kubectl $KUBERNETES_VERSION_2
+
+  if ! which kubectx ; then
+    brew install kubectx
+  fi
+
+  if ! which kubens ; then
+    brew install kubens
+  fi
+
+  if ! which k9s ; then
+    brew install k9s
+  fi
+
+  if ! which minikube ; then
+    brew install minikube
   fi
 }
 
@@ -122,8 +157,8 @@ argocd_setup()
 {
   kubectx cluster2
   kubectl create namespace argocd
-  kubectl apply -n argocd -f yaml/argocd-install.yaml
-  kubectl apply -f yaml/argocd-ingress.yaml
+  kubectl apply -n argocd -f yaml2/argocd-install.yaml
+  kubectl apply -f yaml2/argocd-ingress.yaml
 }
 
 argocd_show_password()
@@ -149,7 +184,7 @@ internal_registry_setup()
   kubectl -n kube-system create configmap registry-cluster \
                   --from-literal=registryAliases=registry.minikube \
                   --from-literal=registryServiceHost="$(minikube -p cluster2 ip)" # Internal registry
-  kubectl -n kube-system apply -f yaml/node-etc-hosts-update.yaml
+  kubectl -n kube-system apply -f yaml2/node-etc-hosts-update.yaml
 }
 
 # https://rancher.com/docs/rancher/v2.5/en/installation/install-rancher-on-k8s/
@@ -224,6 +259,8 @@ init()
   set -x
   set -e
 
+  install_kubectl
+
   # Delete all clusters
   minikube -p cluster delete
   minikube -p cluster2 delete
@@ -250,14 +287,15 @@ init()
   # Set current minikube profile
   minikube profile cluster2
   kubectx cluster2
+  asdf global kubectl $KUBERNETES_VERSION_2
 
   # Setup Kubernetes NFS Subdir External Provisioner
   k8s_nfs_provisioner_setup
 
   init_ingress
 
-  kubectl apply -f yaml/persistent-volumes.yaml
-  kubectl apply -f yaml/dashboard-ingress.yaml
+  kubectl apply -f yaml2/persistent-volumes.yaml
+  kubectl apply -f yaml2/dashboard-ingress.yaml
 
   # Setup Argocd
   argocd_setup
