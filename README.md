@@ -1,4 +1,4 @@
-   * Minikube Kubernetes setup
+e   * Minikube Kubernetes setup
       * 3 cluster nodes
       * Ingress using minikube addon
          * With wildcard DNS record resolving to the ip of Ingress node. Using BIND instead of Minikube addon ingress-dns   
