@@ -9,15 +9,23 @@
 
    * Tested only on MAC OS Monterey, 128G RAM, XEON 16 cores
 
-# Preparing
+# Install
+## Install brew packages
 ```commandline
-brew install kustomize helm minikube pyenv zsh rancher-cli dsnmasq
-pyenv install 3.10.0
-pyenv global 3.10.0 
-pip install kubernetes rich 
+brew install kustomize helm minikube zsh rancher-cli go
 ```
 
-## MAC OS NFS server
+## Build and install tool
+```commandline
+    mkdir -p $HOME/go
+    GOPATH="$HOME/go"
+    export PATH=$PATH:"$GOPATH/bin"
+    
+    cd install/src
+    go install
+```
+
+## Configure MAC OS NFS server
    * /etc/exports
 ```text
 /Users/rogermm/git -maproot=rogermm -rw -network 192.168.64.0 -mask 255.255.255.0
@@ -26,31 +34,6 @@ pip install kubernetes rich
 ```commandline
 sudo nfsd enable
 sudo nfsd restart
-```
-
-## Dnsmasq
-   * /usr/local/etc/dnsmasq.d/world.xpt.conf
-```text
-address=/.world.xpt/192.168.64.118
-```
-
-```commandline
-scutil --dns
-```
-```commandline
-sudo brew services restart dnsmasq
-brew services list
-```
-
-## Persistent volumes
-```commandline
-minikube --node=cluster2     ssh "sudo rm -rf /data/local-storage/pv000{1,2}"
-minikube --node=cluster2-m02 ssh "sudo rm -rf /data/local-storage/pv000{3,4}"
-minikube --node=cluster2-m03 ssh "sudo rm -rf /data/local-storage/pv000{5,6}"
-
-minikube --node=cluster2     ssh "sudo mkdir -p /data/local-storage/pv000{1,2}"
-minikube --node=cluster2-m02 ssh "sudo mkdir -p /data/local-storage/pv000{3,4}"
-minikube --node=cluster2-m03 ssh "sudo mkdir -p /data/local-storage/pv000{5,6}"
 ```
 
 # ArgoCD
@@ -65,6 +48,20 @@ minikube --node=cluster2-m03 ssh "sudo mkdir -p /data/local-storage/pv000{5,6}"
 
 # Rancher
    * https://rancher.world.xpt
+
+## BIND
+```commandline
+sudo brew services restart bind
+sudo brew  services info bind
+```
+   * Debugging
+```commandline
+tail -f /usr/local/var/log/named/named.log
+```
+
+```commandline
+scutil --dns
+```
 
 # Post install checklist
 ## *.cluster.local dns lookups and service/pods connection on host

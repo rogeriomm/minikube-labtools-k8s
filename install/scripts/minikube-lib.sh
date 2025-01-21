@@ -69,7 +69,7 @@ clusters_start()
 
 clusters_post_start()
 {
-  sudo -E python3 minikube-init.py
+  minikube-labtools-k8s-install
 
   argocd_show_password
 
@@ -201,4 +201,6 @@ init()
   rancher_setup
 
   clusters_start
+
+  clusters_post_start
 }

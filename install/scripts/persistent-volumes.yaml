@@ -1,3 +1,6 @@
+#
+# NFS
+#
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -11,6 +14,10 @@ spec:
     storage: 100Gi
   hostPath:
     path: /Volumes/data/lab
+
+#
+#
+#
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -25,6 +32,26 @@ spec:
     storage: 300Gi
   hostPath:
     path: /data # Minikube static data
+#
+# TODO
+#
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: storage-volume
+spec:
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: standard
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: 300Gi
+  hostPath:
+    path: /data # Minikube static data
+#
+# NFS storage
+#
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -102,6 +129,9 @@ spec:
     storage: 100Gi
   hostPath:
     path: /Volumes/data/lab/pv0005
+#
+# MINIO storage, class "minio-local-storage"
+#
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -247,4 +277,3 @@ spec:
               operator: In
               values:
                 - cluster2-m03
-

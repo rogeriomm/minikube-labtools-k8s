@@ -1,9 +1,11 @@
+//
 zone "worldl.xpt" in { // Domain name
     type master; // Primary DNS
     file "/usr/local/etc/bind/zones/db.worldl.xpt"; // Forward lookup file
     allow-update { none; }; // Primary DNS
 };
 
+// Minikube DNS resolver to domain ".cluster.local"
 zone "cluster.local" in {
    type forward;
    forward only;
