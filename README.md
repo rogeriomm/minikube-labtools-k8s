@@ -172,12 +172,62 @@ version=1.18.14 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64
 version=1.23.12 && curl -L "https://dl.k8s.io/release/v$version/bin/darwin/amd64/kubectl" -o kubectl-$version && chmod +x kubectl-$version 
 ```
 
+# DNS
+```shell
+kubectx cluster
+kubectl get svc --namespace=kube-system kube-dns
+kubectx cluster2
+kubectl get svc --namespace=kube-system kube-dns
+```
+
+   * Test DNS cluster 1
+```shell
+dig @10.112.0.10 www.google.com
+```
+
+* Test DNS cluster 2
+```shell
+dig @10.96.0.10 www.google.com
+```
+
+## BIND configuration
+   * /usr/local/etc/bind/named.conf.local
+````text
+zone "worldl.xpt" in { // Domain name
+    type master; // Primary DNS
+    file "/usr/local/etc/bind/zones/db.worldl.xpt"; // Forward lookup file
+    allow-update { none; }; // Primary DNS
+};
+
+// Minikube DNS resolver to domain *.cluster.local"
+zone "cluster.local" in {
+   type forward;
+   forward only;
+   forwarders { 10.96.0.10; };
+};
+
+// Minikube DNS resolver to domain *.cluster1.local"
+zone "cluster1.local" in {
+   type forward;
+   forward only;
+   forwarders { 10.112.0.10; };
+}
+````
+
+
 # Kubernetes NFS Subdir External Provisioner
 ## Uninstall
 ```shell
 helm list
 helm uninstall nfs-subdir-external-provisioner
 ```
+
+# Hyperkit
+   * https://stackoverflow.com/questions/59674804/how-to-list-vms-that-was-started-from-hyperkit
+
+````shell
+ps -Af | grep hyperkit
+````
 
 # See also
    * [How to make ingress certificate](docs/HowToMakeIngressCertificate.md)
