@@ -13,13 +13,6 @@ import (
 	"os/exec"
 	"runtime"
 	"strconv"
-	//appsv1 "k8s.io/api/apps/v1"
-	//apiv1 "k8s.io/api/core/v1"
-	//metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	//"k8s.io/client-go/kubernetes"
-	//"k8s.io/client-go/tools/clientcmd"
-	//"k8s.io/client-go/util/homedir"
-	//"k8s.io/client-go/util/retry"
 )
 
 const Cluster1 = "cluster1"
@@ -40,6 +33,7 @@ var kub2 = k8s{ctx: Cluster2}
 var mkb1 = minikube{Cluster1, true}
 var mkb2 = minikube{Cluster2, true}
 var bind bind9
+var nfsServer nfs
 var minikubeK8sPath string
 var minikubeHomePath string
 var sugar *zap.SugaredLogger
@@ -433,9 +427,7 @@ func startClusters() {
 	mkb1.start()
 	mkb2.start()
 
-	if runtime.GOOS == "linux" {
-		script.Exec("docker ps").Stdout()
-	}
+	script.Exec("docker ps").Stdout()
 }
 
 func stopClusters() {
@@ -443,9 +435,7 @@ func stopClusters() {
 	mkb2.stop()
 	mkb1.stop()
 
-	if runtime.GOOS == "linux" {
-		script.Exec("docker ps").Stdout()
-	}
+	script.Exec("docker ps").Stdout()
 }
 
 func sshCluster() {
@@ -486,7 +476,7 @@ func main() {
 	sugar.Info("minikube labtools")
 
 	if runtime.GOOS != "darwin" && runtime.GOOS != "linux" {
-		sugar.Fatal("It can run only on MACOS or Linux")
+		sugar.Fatal("It can run only on macOS or Linux")
 	}
 
 	labtoolsK8sPath := os.Getenv("LABTOOLS_K8S")
@@ -557,6 +547,8 @@ func main() {
 	case "stop-clusters":
 		sudoValidateUser()
 		stopClusters()
+	case "reconfigure-nfs":
+		nfsServer.reconfigure()
 	default:
 		sugar.Fatal("Invalid command: " + args[0])
 	}
