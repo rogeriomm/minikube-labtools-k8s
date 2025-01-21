@@ -281,9 +281,9 @@ func startCluster2() {
 		sugar.Fatal(err, status)
 	}
 
-	mkb2.addonEnable([]string{"metrics-server", "ingress", "registry", "registry-aliases",
-		"dashboard", "metallb", "storage-provisioner"}, true)
-	mkb2.addonEnable([]string{"ingress-dns"}, false)
+	mkb2.addonEnable([]string{"metrics-server", "ingress", "dashboard",
+		"metallb", "storage-provisioner"}, true)
+	mkb2.addonEnable([]string{"ingress-dns", "registry", "registry-aliases"}, false)
 }
 
 func startCluster1() {
