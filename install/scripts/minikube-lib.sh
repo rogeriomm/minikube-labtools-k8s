@@ -8,7 +8,7 @@
 # OldestKubernetesVersion = "v1.16.0"
 #
 KUBERNETES_VERSION_1="1.23.15"
-KUBERNETES_VERSION_2="1.25.3"
+KUBERNETES_VERSION_2="1.23.15"
 #
 #
 #
@@ -84,6 +84,8 @@ cluster1_create()
            --dns-domain="$CLUSTER1.$CLUSTERS_DOMAIN" \
            --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
+  minikube -p $CLUSTER1 addons enable metrics-server
+
   minikube -p $CLUSTER1 docker-env > "$MINIKUBE_HOME"/docker-env
 
   source "$MINIKUBE_HOME"/docker-env
@@ -146,8 +148,8 @@ clusters_post_start()
 {
   labtools-k8s configure
 
-  kubectx $CLUSTER2
   asdf global kubectl $KUBERNETES_VERSION_2
+  kubectx $CLUSTER2
 
   argocd_show_password
 
@@ -173,6 +175,7 @@ init_ingress()
 
 argocd_setup()
 {
+  asdf global kubectl $KUBERNETES_VERSION_2
   kubectx $CLUSTER2
   kubectl create namespace argocd
   kubectl apply -n argocd -f yaml2/argocd-install.yaml
@@ -181,6 +184,7 @@ argocd_setup()
 
 argocd_show_password()
 {
+  asdf global kubectl $KUBERNETES_VERSION_2
   kubectx $CLUSTER2
 
   while : ; do
