@@ -132,12 +132,7 @@ clusters_start()
   set -x
   set -e
 
-  ip=$(ifconfig en0 | grep 'inet ' | awk '{print $2}')
-
-  if ! dig @$ip www.google.com; then
-    echo "Local DNS server isn't working. Verify your local DNS configuration"
-    exit 1
-  fi
+  check_dns
 
   minikube -p cluster start --embed-certs --wait=all
   minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
@@ -257,6 +252,28 @@ k8s_nfs_provisioner_setup()
       --values nfs-subdir-external-provisioner/values.yaml
 }
 
+check_dns()
+{
+  named-checkconf -z /usr/local/etc/bind/named.conf
+
+  ip=$(ifconfig en0 | grep 'inet ' | awk '{print $2}')
+
+  if ! dig "@$ip" www.google.com; then
+    echo "Local DNS server isn't working. Verify your local DNS configuration"
+    exit 1
+  fi
+}
+
+check_post_dns()
+{
+  # Check local ingress DNS name
+  ip_dns=$(dig +short xxxxx.worldl.xpt)
+  ip_minikube=$(minikube ip)
+  if [ "$ip_dns" != "$ip_minikube" ]; then
+    exit 1
+  fi
+}
+
 are_you_sure()
 {
   # shellcheck disable=SC1049
@@ -282,6 +299,8 @@ init()
   echo "Installation..."
   set -x
   set -e
+
+  check_dns
 
   install_kubectl
 
