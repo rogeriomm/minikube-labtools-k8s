@@ -10,7 +10,7 @@ RUN apt update && \
                    htop zsh jq file less \
                    neovim nano \
                    kafkacat \
-                   \
+                   kubecolor \
                    && \
     apt clean
 
