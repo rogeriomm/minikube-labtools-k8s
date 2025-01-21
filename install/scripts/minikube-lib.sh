@@ -51,6 +51,8 @@ cluster2_create()
   minikube -p $PROFILE addons disable storage-provisioner
 
   minikube -p $PROFILE addons list
+
+  cp minikube-certs/{ca.crt,ca.key,ca.pem,cert.pem,key.pem} "$MINIKUBE_HOME"
 }
 
 clusters_start()
@@ -80,6 +82,15 @@ minikube_get_host_ip()
 {
   ip=$(ifconfig bridge100 | grep "inet " | awk -F ' ' '{print $2}')
   echo "$ip"
+}
+
+init_ingress()
+{
+  kubectl -n kube-system create secret tls mkcert \
+      --key  "ingress-certs/server-key.pem" \
+      --cert "ingress-certs/server.crt"
+  echo "Enter custom cert: kube-system/mkcert"
+  minikube addons configure ingress
 }
 
 argocd_setup()
@@ -218,7 +229,10 @@ init()
   # Setup Kubernetes NFS Subdir External Provisioner
   k8s_nfs_provisioner_setup
 
+  init_ingress
+
   kubectl apply -f yaml/persistent-volumes.yaml
+  kubectl apply -f yaml/dashboard-ingress.yaml
 
   # Setup Argocd
   argocd_setup
