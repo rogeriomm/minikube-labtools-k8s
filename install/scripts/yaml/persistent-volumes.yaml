@@ -277,3 +277,77 @@ spec:
               operator: In
               values:
                 - cluster2-m03
+
+
+#
+# Standard storage
+#
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-cluster2
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-cluster2-m02
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m02
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-cluster2-m03
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m03

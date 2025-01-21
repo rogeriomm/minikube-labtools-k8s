@@ -9,7 +9,7 @@ sysfs           /sys            sysfs   defaults        0       0
 # /Users/$USERNAME/git -maproot=$USERNAME -rw -network 192.168.64.0 -mask 255.255.255.0
 # /Volumes/data -maproot=$USERNAME -rw -network 192.168.64.0 -mask 255.255.255.0
 #
-# Restart nfs servcice "sudo nfsd restart"
+# Restart nfs service "sudo nfsd restart"
 #
 host.minikube.internal:/Volumes/data /Volumes/data nfs defaults 0 0
 #
