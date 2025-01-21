@@ -3,7 +3,8 @@ kind: PersistentVolume
 metadata:
   name: labtools-volume
 spec:
-  storageClassName: macos 
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: macos
   accessModes:
     - ReadWriteMany
   capacity:
@@ -16,7 +17,8 @@ kind: PersistentVolume
 metadata:
   name: host-volume
 spec:
-  storageClassName: host 
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: host
   accessModes:
     - ReadWriteMany
   capacity:
@@ -29,7 +31,8 @@ kind: PersistentVolume
 metadata:
   name: default-volume
 spec:
-  storageClassName: default 
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: default
   accessModes:
     - ReadWriteMany
   capacity:
