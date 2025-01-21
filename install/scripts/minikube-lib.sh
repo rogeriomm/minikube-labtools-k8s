@@ -1,7 +1,8 @@
 # https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
 # brew install docker-credential-helper
 
-KUBERNETES_VERSION="1.22.15"
+KUBERNETES_VERSION_1="1.18.14"
+KUBERNETES_VERSION_2="1.23.12"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
@@ -26,7 +27,7 @@ cluster1_create()
   minikube -p $PROFILE config view
 
   minikube -p $PROFILE start \
-           --kubernetes-version="v${KUBERNETES_VERSION}" \
+           --kubernetes-version="v${KUBERNETES_VERSION_1}" \
            --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
   minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
@@ -44,7 +45,7 @@ cluster2_create()
   minikube -p $PROFILE config view
 
   minikube -p $PROFILE start \
-           --kubernetes-version="v${KUBERNETES_VERSION}" \
+           --kubernetes-version="v${KUBERNETES_VERSION_2}" \
            --extra-config=kubelet.max-pods=100 \
            --nodes 3 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
