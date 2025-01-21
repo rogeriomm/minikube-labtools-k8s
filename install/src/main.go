@@ -6,6 +6,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"log"
 	"os"
@@ -17,6 +19,12 @@ import (
 func flushDnsCache() {
 	log.Println("Flushing host DNS cache...")
 	_, err := exec.Command("dscacheutil", "-flushcache").Output()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = exec.Command("sudo", "killall", "-HUP", "mDNSResponder").Output()
 
 	if err != nil {
 		log.Fatal(err)
@@ -107,7 +115,24 @@ func help() {
 	fmt.Println("   set-ingress    Set K8S ingress")
 }
 
+func gen_man() {
+	cmd := &cobra.Command{
+		Use:   "test",
+		Short: "my test program",
+	}
+
+	header := &doc.GenManHeader{
+		Title:   "MINE",
+		Section: "3",
+	}
+	err := doc.GenManTree(cmd, header, "/tmp")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
+
 	log.Println("Minikube lab tool")
 
 	if runtime.GOOS != "darwin" {
