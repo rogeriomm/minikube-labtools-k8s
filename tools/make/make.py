@@ -414,7 +414,7 @@ def init():
 
     so_username = getpass.getuser()
     github_username = "rogeriomm"
-    registry_name = "registry.minikube"
+    registry_name = "jfrog.worldl.xpt/lab"
 
     init_docker()
 
