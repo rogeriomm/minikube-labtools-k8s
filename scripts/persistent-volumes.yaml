@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: labtools-volume
+  name: lab
 spec:
   persistentVolumeReclaimPolicy: Delete
-  storageClassName: macos
+  storageClassName: remote
   accessModes:
     - ReadWriteMany
   capacity:
-    storage: 30Gi
+    storage: 100Gi
   hostPath:
-    path: /labtools-k8s # See scripts/minikube-mount.sh
+    path: /Volumes/data/lab
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -22,23 +22,9 @@ spec:
   accessModes:
     - ReadWriteMany
   capacity:
-    storage: 60Gi
+    storage: 300Gi
   hostPath:
     path: /data # Minikube static data
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: default-volume
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: default
-  accessModes:
-    - ReadWriteMany
-  capacity:
-    storage: 80Gi
-  hostPath:
-    path: /data/default # Minikube static data
 ---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass

@@ -6,6 +6,8 @@ KUBERNETES_VERSION="1.21.6"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
+MINIKUBE_ETC=$MINIKUBE_FILES/etc
+MINIKUBE_CERTS=$MINIKUBE_FILES/certs
 
 cluster1_create()
 {
@@ -16,7 +18,7 @@ cluster1_create()
   minikube -p $PROFILE config set disk-size 100g
   minikube -p $PROFILE config view
 
-  minikube -p $PROFILE start --container-runtime=docker \
+  minikube -p $PROFILE start \
            --kubernetes-version="v${KUBERNETES_VERSION}" \
            --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
@@ -34,7 +36,7 @@ cluster2_create()
   minikube -p $PROFILE config set disk-size 100g
   minikube -p $PROFILE config view
 
-  minikube -p $PROFILE start --container-runtime=docker \
+  minikube -p $PROFILE start \
            --kubernetes-version="v${KUBERNETES_VERSION}" \
            --nodes 2 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
@@ -55,6 +57,14 @@ clusters_start()
   set -x
   set -e
 
+  cp -r ./files "$MINIKUBE_HOME"
+
+  # Copy certificate
+  copy_cert
+
+  # Create mounts, edit fstab
+  create_mounts
+
   minikube -p cluster2 start --embed-certs
 
   minikube -p cluster start --embed-certs
@@ -68,8 +78,7 @@ clusters_start()
 
 clusters_post_start()
 {
-  echo "SERVER=\"$(minikube_get_host_ip)\"" > values.conf
-  echo "HOST_USERNAME=${USERNAME}" >> values.conf
+  echo "HOST_USERNAME=${USERNAME}" > "${MINIKUBE_FILES}/home/docker/.values.conf"
 
   python3 minikube-init.py
 
@@ -142,8 +151,16 @@ rancher_show_password()
 
 copy_cert()
 {
-  mkdir -p "$MINIKUBE_HOME"/certs
-  cp world.xpt.pem "$MINIKUBE_HOME"/certs
+  cp world.xpt.pem "${MINIKUBE_CERTS}/"
+}
+
+create_mounts()
+{
+  {
+    echo "# Added by script #"
+    echo "host.minikube.internal:/Users/${USERNAME}/git /Users/${USERNAME}/git nfs defaults 0 0"
+    echo "###################"
+  } >> "${MINIKUBE_ETC}/fstab"
 }
 
 are_you_sure()
@@ -166,14 +183,7 @@ init()
   minikube -p cluster delete
   minikube -p cluster2 delete
 
-  # Copy certificate
-  copy_cert
-
-  # Create cluster with 1 node
-  cluster1_create
-
-  # Create cluster with 2 nodes
-  cluster2_create
+  clusters_start
 
   # Setup internal registry
   internal_registry_setup
