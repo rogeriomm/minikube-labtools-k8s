@@ -33,23 +33,6 @@ spec:
   hostPath:
     path: /data # Minikube static data
 #
-# TODO
-#
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: storage-volume
-spec:
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: standard
-  accessModes:
-    - ReadWriteMany
-  capacity:
-    storage: 300Gi
-  hostPath:
-    path: /data # Minikube static data
-#
 # NFS storage
 #
 ---
