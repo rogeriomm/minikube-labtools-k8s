@@ -116,9 +116,17 @@ def main() -> int:
     console.print(f"Ingress node: {ingress_node}")
     minikube_ip_ingress = minikube_get_ip(ingress_node)
 
-    if not update_host(minikube_ip_ingress, ['argocd.world.xpt', 'rancher.world.xpt']):
-        console.print("Minikube installation failed: update hosts", style="error")
-        return 1
+    with open('/usr/local/etc/dnsmasq.d/worldl.xpt.conf', 'w') as f:
+        f.write(f"address=/.worldl.xpt/{minikube_ip_ingress}")
+
+    with open('/etc/resolver/worldl.xpt', 'w') as f:
+        f.write("nameserver 127.0.0.1")
+
+    # Reload Dnsmasqd configuration and clear cache
+    assert os.system("cp $(sudo -u $SUDO_USER brew list dnsmasq | grep /homebrew.mxcl.dnsmasq.plist$) /Library/LaunchDaemons/") == 0
+    assert os.system("launchctl unload /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist") == 0
+    assert os.system("launchctl load /Library/LaunchDaemons/homebrew.mxcl.dnsmasq.plist") == 0
+    assert os.system("dscacheutil -flushcache") == 0
 
     return 0
 

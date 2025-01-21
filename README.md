@@ -1,5 +1,5 @@
    * Minikube Kubernetes setup
-      * 2 cluster nodes
+      * 3 cluster nodes
       * Ingress using minikube addon
       * Container registry
       * ArgoCD 
@@ -10,11 +10,9 @@
 
 # Preparing
 ```commandline
-brew install kustomize helm minikube pyenv zsh rancher-cli
+brew install kustomize helm minikube pyenv zsh rancher-cli dsnmasq
 pyenv install 3.10.0
 pyenv global 3.10.0 
-```   
-```commandline
 pip install kubernetes rich 
 ```
 
@@ -29,9 +27,25 @@ sudo nfsd enable
 sudo nfsd restart
 ```
 
+## Dnsmasq
+   * /usr/local/etc/dnsmasq.d/world.xpt.conf
+```text
+address=/.world.xpt/192.168.64.118
+```
+
+```commandline
+scutil --dns
+```
+```commandline
+sudo brew services restart dnsmasq
+```
+
 # ArgoCD
    * ArgoCD login
-      * ```argocd login argocd.world.xpt:443```
+```commandline
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+   argocd login --insecure --username admin localhost:8080
+```
 
    * ArgoCD web
       * https://argocd.world.xpt
@@ -39,6 +53,8 @@ sudo nfsd restart
 # Rancher
    * https://rancher.world.xpt
 
-## References
+# References
    * https://argo-cd.readthedocs.io/en/stable/getting_started/
    * https://rancher.com/docs/rancher/v2.5/en/installation/install-rancher-on-k8s
+   * https://www.youtube.com/watch?v=_pUXOn_VRdQ: Nginx Ingress Controller Minikube with dnsmasq
+   * https://gist.github.com/davebarnwell/c408533d608bfe24f4f5: Install dnsmasq and configure for *.dev.local domains
