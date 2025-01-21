@@ -42,6 +42,17 @@ sudo brew services restart dnsmasq
 brew services list
 ```
 
+## Persistent volumes
+```commandline
+minikube --node=cluster2     ssh "sudo rm -rf /data/local-storage/pv000{1,2}"
+minikube --node=cluster2-m02 ssh "sudo rm -rf /data/local-storage/pv000{3,4}"
+minikube --node=cluster2-m03 ssh "sudo rm -rf /data/local-storage/pv000{5,6}"
+
+minikube --node=cluster2     ssh "sudo mkdir -p /data/local-storage/pv000{1,2}"
+minikube --node=cluster2-m02 ssh "sudo mkdir -p /data/local-storage/pv000{3,4}"
+minikube --node=cluster2-m03 ssh "sudo mkdir -p /data/local-storage/pv000{5,6}"
+```
+
 # ArgoCD
    * ArgoCD login
 ```commandline
@@ -88,3 +99,4 @@ ping anything.worldl.xpt
    * https://www.youtube.com/watch?v=_pUXOn_VRdQ: Nginx Ingress Controller Minikube with dnsmasq
    * https://gist.github.com/davebarnwell/c408533d608bfe24f4f5: Install dnsmasq and configure for *.dev.local domains
    * https://gist.github.com/loa/a88803c5678381eb515ab7f1241199a3: Minikube host networking integration
+   * https://kubernetes.io/docs/concepts/storage/volumes/#local: 
