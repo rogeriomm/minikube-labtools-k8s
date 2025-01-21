@@ -193,14 +193,7 @@ func gen_man() {
 func setContext(ctx string) {
 	kub.kubecfg(ctx)
 	minikubeSetProfile(ctx)
-
-	switch ctx {
-	case "cluster":
-		asdf("1.18.14")
-
-	case "cluster2":
-		asdf("1.23.12")
-	}
+	asdf(kub.serverVersion)
 }
 
 func main() {
