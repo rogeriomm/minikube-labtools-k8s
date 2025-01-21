@@ -17,7 +17,7 @@ alias lab2="labtools-k8s set-context cluster2 && k9s --cluster cluster2 -A"
 
    * Test context switch
 ```shell
-lab
+lab1
 ```
 
 ```shell
