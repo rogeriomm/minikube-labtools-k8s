@@ -1,11 +1,14 @@
 # Add CA certificate
    * Add Minikube CA certificate using script
-```commandline
+
+   * Jetbrains manual instalation
+```shell
 cd install/scripts
 ./jetbrains-manual-add-certificate.sh
 ```
 
-```commandline
+   * Jetbrains toolbox instalation 
+```shell
 cd install/scripts
 ./jetbrains-toolbox-add-certificate.sh
 ```
