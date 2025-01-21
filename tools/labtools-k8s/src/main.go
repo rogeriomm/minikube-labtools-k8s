@@ -41,6 +41,8 @@ var sugar *zap.SugaredLogger
 func configureClusters() {
 	sugar.Info("Configure clusters")
 
+	nfsServer.reconfigure()
+
 	kub1.connect()
 	kub2.connect()
 
@@ -250,15 +252,7 @@ func showClustersConfiguration() {
 	script.Exec("ip r").Stdout()
 }
 
-func createClusters() {
-	cpus := runtime.NumCPU()
-	mkb2.config("cpus", strconv.Itoa(cpus))
-
-	totalRam := memory.TotalMemory()
-	mkb2.configSize("memory", (float64(totalRam)/4)*0.65)
-
-	mkb2.config("disk-size", "130G")
-
+func startCluster2() {
 	var osStr string
 
 	switch runtime.GOOS {
@@ -273,7 +267,7 @@ func createClusters() {
 	--dns-domain="` + mkb2.profile + `.` + ClustersDomain + `" 
 	--extra-config=kubelet.max-pods=150
 	--nodes 4
-	--insecure-registry "192.168.64.0/24,10.0.0.0/8"
+	--insecure-registry "192.168.0.0/16,10.0.0.0/8"
 	--service-cluster-ip-range='` + Cluster2SvcSubnet + `' ` + `--cache-images=true ` +
 		osStr
 
@@ -286,27 +280,52 @@ func createClusters() {
 
 	mkb2.addonEnable([]string{"metrics-server", "ingress", "registry", "registry-aliases", "dashboard", "metallb"}, true)
 	mkb2.addonEnable([]string{"ingress-dns", "storage-provisioner"}, false)
+}
 
-	mkb1.config("cpus", strconv.Itoa(cpus))
-	mkb1.configSize("memory", (float64(totalRam)/3)*0.6)
-	mkb1.config("disk-size", "100G")
+func startCluster1() {
+	var osStr string
 
-	cmd = `minikube -p ` + mkb1.profile + ` start
+	switch runtime.GOOS {
+	case "linux":
+		osStr = `--driver='docker'`
+	case "darwin":
+		osStr = `--driver='docker'`
+	}
+
+	cmd := `minikube -p ` + mkb1.profile + ` start
 	--kubernetes-version="v` + KubernetesVersion1 + `" 
 	--dns-domain="` + mkb1.profile + `.` + ClustersDomain + `" 
 	--nodes 1
-	--insecure-registry "192.168.64.0/24,10.0.0.0/8"
+	--insecure-registry "192.168.0.0/16,10.0.0.0/8"
 	--service-cluster-ip-range='` + Cluster1SvcSubnet + `' ` + `--cache-images=true ` +
 		osStr
 
 	sugar.Info(cmd)
-	status, err = script.Exec(cmd).Stdout()
+	status, err := script.Exec(cmd).Stdout()
 
 	if err != nil {
 		sugar.Fatal(err, status)
 	}
 
 	mkb1.addonEnable([]string{"metrics-server", "dashboard"}, true)
+}
+
+func createClusters() {
+	cpus := runtime.NumCPU()
+	mkb2.config("cpus", strconv.Itoa(cpus))
+
+	totalRam := memory.TotalMemory()
+	mkb2.configSize("memory", (float64(totalRam)/4)*0.65)
+
+	mkb2.config("disk-size", "130G")
+
+	startCluster2()
+
+	mkb1.config("cpus", strconv.Itoa(cpus))
+	mkb1.configSize("memory", (float64(totalRam)/3)*0.6)
+	mkb1.config("disk-size", "100G")
+
+	startCluster1()
 }
 
 func destroyClusters() {
@@ -428,8 +447,8 @@ func setupK8sRegistry() {
 func startClusters() {
 	nfsServer.reconfigure()
 
-	mkb1.start()
-	mkb2.start()
+	startCluster1()
+	startCluster2()
 
 	script.Exec("docker ps").Stdout()
 }

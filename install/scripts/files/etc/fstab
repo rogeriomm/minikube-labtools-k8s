@@ -5,5 +5,4 @@ devpts          /dev/pts        devpts  defaults,gid=5,mode=620 0       0
 sysfs           /sys            sysfs   defaults        0       0
 
 #
-host.minikube.internal:/Volumes/data/git /Volumes/data/git nfs nfsvers=3,auto 0 0
-#
+macos.worldl.xpt:/Volumes/data/git /Volumes/data/git nfs nfsvers=3,auto 0 0

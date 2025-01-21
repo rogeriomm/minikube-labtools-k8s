@@ -27,14 +27,14 @@ func (bind *bind9) open() {
 		sugar.Fatal("BIND9 not installed")
 	}
 
-	bind.labBindPath = minikubeK8sPath + "/install/scripts/bind/" + runtime.GOOS
+	bind.labBindPath = minikubeK8sPath + "/install/scripts/bind/" + runtime.GOOS + "/docker/"
 
 	if script.IfExists(bind.configPath+"/zones").Error() != nil {
 		script.Exec("sudo chown -R mac /etc/bind").Stdout()
 		os.MkdirAll(bind.configPath+"/zones", 0777)
 	}
 
-	script.Exec("cp " + bind.labBindPath + "/zones/db.worldl.xpt " + bind.configPath + "/zones/").Stdout()
+	script.Exec("zsh -c 'cp " + bind.labBindPath + "/zones/* " + bind.configPath + "/zones/'").Stdout()
 
 	if runtime.GOOS == "linux" {
 		script.Exec("cp " + bind.labBindPath + "/named.conf.local " + bind.configPath).Stdout()
