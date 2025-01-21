@@ -10,11 +10,21 @@
 
 # Preparing
 ```commandline
-brew install kustomize helm minikube pyen zsh rancher-cli
+brew install kustomize helm minikube pyenv zsh rancher-cli
 pyenv install 3.10.0
 pyenv global 3.10.0 
 ```   
-   
+## MAC OS NFS server
+   * /etc/exports
+```text
+/Users/rogermm/git -maproot=rogermm -rw -network 192.168.64.0 -mask 255.255.255.0
+/Volumes/data -maproot=rogermm -rw -network 192.168.64.0 -mask 255.255.255.0
+```
+```commandline
+sudo nfsd enable
+sudo nfsd restart
+```
+
 # ArgoCD
    * ArgoCD login
       * ```argocd login argocd.world.xpt:443```
