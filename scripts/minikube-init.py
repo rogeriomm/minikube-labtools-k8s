@@ -2,6 +2,7 @@ import os
 import shutil
 from python_hosts import Hosts, HostsEntry
 import ipaddress
+from kubernetes import client, config
 from rich.traceback import install
 from rich.console import Console
 from rich.theme import Theme
@@ -80,26 +81,35 @@ def main() -> int:
 
     console.print(":ok: Post installation...")
 
+    # Configs can be set in Configuration class directly or using helper utility
+    config.load_kube_config()
+
+    kbct = client.CoreV1Api()
+
+    ret = kbct.list_node()
+
     minikube_set_profile("cluster2")
-    minikube_ip1 = minikube_get_ip("cluster2")
-    minikube_ip2 = minikube_get_ip("cluster2-m02")
-    sshkey1 = minikube_get_sshkey("cluster2")
-    sshkey2 = minikube_get_sshkey("cluster2-m02")
 
-    console.print(f"Minikube cluster2 ip: {minikube_ip1} {minikube_ip2}")
+    nodes = {}
+    for i in ret.items:
+        node = i.metadata.name
+        address = i.status.addresses[0].address
+        sshkey = minikube_get_sshkey(i.metadata.name)
+        nodes[node] = (address, sshkey)
 
-    if minikube_ip1 is None or \
-            minikube_ip2 is None or \
-            sshkey1 is None or \
-            sshkey2 is None:
-        console.print("Minikube installation failed: invalid minikube ip/ssh-key", style="error")
-        return 1
+    for node in nodes:
+        val = nodes[node]
+        console.print(node, val)
+        if val[0] == '' or val[1] == '':
+            console.print(f"Minikube installation failed: invalid minikube ip/ssh-key node {node}", style="error")
+            return
 
     # Execute initialization script on minikube nodes
     console.print("Running init script on nodes...")
     cmd = "ssh \"[ -f init.sh ] && sudo sh init.sh\""
-    minikube_cmd("cluster2", cmd, is_print=True)
-    minikube_cmd("cluster2-m02", cmd, is_print=True)
+
+    for node in nodes:
+        minikube_cmd(node, cmd, is_print=True)
 
     ingress_node = minikube_get_ingress_node()
 

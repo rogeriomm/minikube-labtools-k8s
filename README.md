@@ -14,6 +14,10 @@ brew install kustomize helm minikube pyenv zsh rancher-cli
 pyenv install 3.10.0
 pyenv global 3.10.0 
 ```   
+```commandline
+pip install kubernetes rich 
+```
+
 ## MAC OS NFS server
    * /etc/exports
 ```text
