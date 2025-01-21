@@ -1,4 +1,4 @@
-e   * Minikube Kubernetes setup
+   * Minikube Kubernetes setup
       * 3 cluster nodes
       * Ingress using minikube addon
          * With wildcard DNS record resolving to the ip of Ingress node. Using BIND instead of Minikube addon ingress-dns   
@@ -13,11 +13,11 @@ e   * Minikube Kubernetes setup
 
 # Install
 ## Install packages on MACOS
-```commandline
+```shell
 brew install zsh minikube helm go kustomize cfssl
 ```
    * Optional
-```commandline
+```shell
 brew install rancher-cli
 ```
 
@@ -96,16 +96,16 @@ sudo nfsd restart
 
 # BIND
    * Restart service
-```commandline
+```shell
 sudo brew services restart bind
 sudo brew  services info bind
 ```
    * Debugging
-```commandline
+```shell
 tail -f /usr/local/var/log/named/named.log
 ```
    * Getting MACOS dns configuration
-```commandline
+```shell
 scutil --dns
 ```
 
@@ -131,12 +131,12 @@ dig @10.96.0.10 kube-dns.kube-system.svc.cluster.local
 dig @10.96.0.10 web.default.svc.cluster.local
 ```
    * Check TCP service/pod TCP connection
-```commandline
+```shell
 curl http://web.default.svc.cluster.local:8080
 ```
 
 ## Ingress dns lookups
-```commandline
+```shell
 minikube ip
 ping anything.worldl.xpt
 ```
@@ -147,16 +147,16 @@ kubectl -n kube-system delete secret mkcert
 ```
 
 ```shell
-kubectl -n kube-system create secret tls mkcert \ 
-          --key  "$LABTOOLS/install/scripts/ingress-certs/server-key.pem" \
-          --cert "$LABTOOLS/install/scripts/ingress-certs/server.crt"
+kubectl -n kube-system create secret tls mkcert \
+      --key  "$LABTOOLS/modules/minikube-labtools-k8s/install/scripts/ingress-certs/server-key.pem" \
+      --cert "$LABTOOLS/modules/minikube-labtools-k8s/install/scripts/ingress-certs/server.crt"
 ```
 
    * _kube-system/mkcert_
-```commandline
+```shell
 minikube addons configure ingress
 ```
-```commandline
+```shell
 minikube addons disable ingress
 minikube addons enable ingress
 ```
