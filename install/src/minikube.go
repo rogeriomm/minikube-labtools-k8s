@@ -6,6 +6,10 @@ import (
 	"os/exec"
 )
 
+func minikubeRun(cmd string) {
+	fmt.Println(cmd)
+}
+
 func minikubeSsh(node string, parms string) {
 	out, err := exec.Command("minikube", "--node="+node, "ssh", parms).Output()
 	if err != nil {
@@ -35,7 +39,13 @@ func minikubeGetMainIp() string {
 func minikubeAddIpRoute() {
 	ip := minikubeGetMainIp()
 
-	out, err := exec.Command("sudo", "route", "-n", "add", "10.0.0.0/8", ip).Output()
+	out, err := exec.Command("sudo", "route", "-n", "delete", "10.0.0.0/8", ip).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(out))
+
+	out, err = exec.Command("sudo", "route", "-n", "add", "10.0.0.0/8", ip).Output()
 	if err != nil {
 		log.Fatal(err)
 	}

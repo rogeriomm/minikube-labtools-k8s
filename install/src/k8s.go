@@ -29,7 +29,7 @@ func (k *k8s) kubecfg() {
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)

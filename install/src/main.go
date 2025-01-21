@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 )
 
@@ -108,6 +109,11 @@ func help() {
 
 func main() {
 	log.Println("Minikube lab tool")
+
+	if runtime.GOOS != "darwin" {
+		log.Fatal("It can run only on MACOS")
+	}
+
 	args := os.Args[1:]
 
 	if len(args) < 1 {
