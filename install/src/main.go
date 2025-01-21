@@ -38,6 +38,13 @@ func sudoValidateUser() {
 	}
 }
 
+func asdf(version string) {
+	_, err := exec.Command("asdf", "global", "kubectl", version).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func configure() {
 	bind := Bind9{}
 
@@ -161,9 +168,10 @@ func cleanAvailablePv(ctx string) {
 func help() {
 	fmt.Println("Minikube lab tool")
 	fmt.Println("Commands:")
-	fmt.Println("   configure      Configure")
-	fmt.Println("   set-ingress    Set K8S ingress")
-	fmt.Println("   clean-available-pv    Clean available pv")
+	fmt.Println("  configure          Configure")
+	fmt.Println("  set-ingress        Set K8S ingress")
+	fmt.Println("  clean-available-pv Clean available pv")
+	fmt.Println("  set-context        Set context")
 }
 
 func gen_man() {
@@ -179,6 +187,19 @@ func gen_man() {
 	err := doc.GenManTree(cmd, header, "/tmp")
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func setContext(ctx string) {
+	kub.kubecfg(ctx)
+	minikubeSetProfile(ctx)
+
+	switch ctx {
+	case "cluster":
+		asdf("1.18.14")
+
+	case "cluster2":
+		asdf("1.23.12")
 	}
 }
 
@@ -207,6 +228,13 @@ func main() {
 			return
 		}
 		cleanAvailablePv(args[1])
+	case "set-context":
+		if len(args) < 2 {
+			help()
+			return
+		}
+		setContext(args[1])
+
 	default:
 		log.Fatal("Invalid command: " + args[0])
 		help()
