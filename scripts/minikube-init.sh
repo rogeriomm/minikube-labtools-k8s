@@ -1,5 +1,8 @@
 #!/usr/bin/env zsh
 
+# https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
+# brew install docker-credential-helper
+
 cluster1_create()
 {
   PROFILE=cluster
@@ -11,9 +14,9 @@ cluster1_create()
 
   minikube -p $PROFILE start --nodes 1 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
-  minikube -p cluster docker-env > ~/.minikube/docker-env
+  minikube -p cluster docker-env > "$MINIKUBE_HOME"/docker-env
 
-  source ~/.minikube/docker-env
+  source "$MINIKUBE_HOME"/docker-env
 }
 
 cluster2_create()
@@ -34,6 +37,7 @@ cluster2_create()
   minikube -p $PROFILE addons enable dashboard
   minikube -p $PROFILE addons enable metrics-server
   minikube -p $PROFILE addons disable registry-creds
+  minikube -p $PROFILE addons enable metallb
 
   minikube -p $PROFILE addons list
 }
@@ -52,7 +56,7 @@ argocd_show_password()
 
   while : ; do
     kubectl -n argocd get secret/argocd-initial-admin-secret 2> /dev/null > /dev/null && break
-    sleep 5
+    sleep 15
   done
   set +x
   echo -n "ARGOCD admin password: "
@@ -72,9 +76,15 @@ internal_registry_setup()
   kubectl -n kube-system apply -f node-etc-hosts-update.yaml
 }
 
+copy_cert()
+{
+  mkdir -p "$MINIKUBE_HOME"/.minikube/certs
+  cp world.xpt.pem "$MINIKUBE_HOME"/.minikube/certs
+}
+
 are_you_sure()
 {
-  read -q "REPLY? Initialize Minikube(y/n)? "
+  read -q "REPLY?Initialize Minikube(y/n)? "
   echo "\n"
 
   if [ "$REPLY" = "n" ]; then
@@ -87,9 +97,18 @@ init()
   echo "Installation..."
   set -x
 
+  if [ -z "$MINIKUBE_HOME" ]; then
+    MINIKUBE_HOME="$HOME/.minikube"
+  fi
+
+  MINIKUBE_FILES=$MINIKUBE_HOME/files
+
   # Delete all clusters
   minikube -p cluster delete
   minikube -p cluster2 delete
+
+  # Copy certificate
+  copy_cert
 
   # Create cluster with 1 node
   cluster1_create
@@ -108,9 +127,6 @@ init()
 
   # Setup Argocd
   argocd_setup
-  argocd_show_password
-
-  sudo python3 minikube-init.py
 }
 
 # //192.168.0.201/share /share cifs  credentials=/home/docker/.smbcredentials 0 0
@@ -119,12 +135,13 @@ post_init()
 {
   echo "Post installation..."
   set -x
-  sudo python3 minikube-init.py
+  python3 minikube-init.py
+  argocd_show_password
 }
 
 if [[ "$1" = "install" ]]; then
+  sudo echo -n
   are_you_sure
-  sudo echo
   init
   post_init
 elif [[ "$1" = "postinstall" ]]; then
