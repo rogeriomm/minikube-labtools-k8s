@@ -27,7 +27,7 @@ func flushDnsCache() {
 }
 
 func sudoValidateUser() {
-	_, err := exec.Command("sudo", "-v").Output()
+	_, err := exec.Command("sudo", "-k", "-v").Output()
 	if err != nil {
 		sugar.Error(err)
 	}
