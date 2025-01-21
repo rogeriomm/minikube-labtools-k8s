@@ -13,7 +13,10 @@ import (
 )
 
 const CLUSTER1 = "cluster1"
+const SUBNET1 = "10.112.0.0/12"
+
 const CLUSTER2 = "cluster2"
+const SUBNET2 = "10.96.0.0/12"
 
 var kub k8s
 
@@ -80,7 +83,8 @@ func configure() {
 	createPv(CLUSTER2)
 
 	log.Println("Add Minikube IP route")
-	minikubeAddIpRoute()
+	minikubeAddIpRoute(CLUSTER1, SUBNET1)
+	minikubeAddIpRoute(CLUSTER2, SUBNET2)
 
 	bind.restartBind()
 	flushDnsCache()
@@ -238,6 +242,5 @@ func main() {
 
 	default:
 		log.Fatal("Invalid command: " + args[0])
-		help()
 	}
 }
