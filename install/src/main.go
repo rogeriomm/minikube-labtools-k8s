@@ -118,10 +118,9 @@ func createPv(ctx string) {
 	}
 
 	for _, pv := range pvList.Items {
-		if pv.Spec.StorageClassName == "standard" &&
-			*pv.Spec.VolumeMode == "Filesystem" {
-
-			// FIXME check array size
+		if *pv.Spec.VolumeMode == "Filesystem" &&
+			pv.Spec.NodeAffinity != nil &&
+			len(pv.Spec.NodeAffinity.Required.NodeSelectorTerms) == 1 {
 			operator := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Operator
 			node := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Values[0]
 			path := pv.Spec.Local.Path
@@ -146,9 +145,10 @@ func cleanAvailablePv(ctx string) {
 	for _, pv := range pvList.Items {
 		if pv.Status.Phase == "Available" &&
 			pv.Spec.StorageClassName == "standard" &&
-			*pv.Spec.VolumeMode == "Filesystem" {
+			*pv.Spec.VolumeMode == "Filesystem" &&
+			pv.Spec.NodeAffinity != nil &&
+			len(pv.Spec.NodeAffinity.Required.NodeSelectorTerms) == 1 {
 
-			// FIXME check array size
 			operator := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Operator
 			node := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Values[0]
 			name := pv.Name

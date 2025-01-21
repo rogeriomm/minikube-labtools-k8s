@@ -28,7 +28,8 @@ func minikubeSetProfile(name string) {
 	}
 }
 
-func minikubeGetMainIp() string {
+func minikubeGetIp(name string) string {
+	minikubeSetProfile(name)
 	out, err := exec.Command("minikube", "ip").Output()
 	if err != nil {
 		log.Fatal(err)
@@ -36,18 +37,23 @@ func minikubeGetMainIp() string {
 	return string(out)
 }
 
+func addIpRoute(subnet string, gateway string) {
+	_, err := exec.Command("sudo", "route", "-n", "delete", subnet, gateway).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Println(string(out))
+
+	_, err = exec.Command("sudo", "route", "-n", "add", subnet, gateway).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Println(string(out))
+}
+
 func minikubeAddIpRoute() {
-	ip := minikubeGetMainIp()
-
-	out, err := exec.Command("sudo", "route", "-n", "delete", "10.0.0.0/8", ip).Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(out))
-
-	out, err = exec.Command("sudo", "route", "-n", "add", "10.0.0.0/8", ip).Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(out))
+	ip := minikubeGetIp("cluster")
+	addIpRoute("10.112.0.0/12", ip)
+	ip = minikubeGetIp("cluster2")
+	addIpRoute("10.96.0.0/12", ip)
 }
