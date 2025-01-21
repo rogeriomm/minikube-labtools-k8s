@@ -1,0 +1,17 @@
+zone "cluster1.xpt" in {
+   type forward;
+   forward only;
+   forwarders { 10.112.0.10; };
+};
+
+zone "cluster2.xpt" in {
+   type forward;
+   forward only;
+   forwarders { 10.96.0.10; };
+};
+
+zone "worldl.xpt" in {
+   type forward;
+   forward only;
+   forwarders { 192.168.15.250; };
+};
