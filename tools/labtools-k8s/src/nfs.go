@@ -1,8 +1,8 @@
 package main
 
 import (
+	"os"
 	"os/exec"
-	"os/user"
 	"runtime"
 	"strings"
 )
@@ -11,13 +11,23 @@ type nfs struct {
 }
 
 func (m *nfs) reconfigure() {
-	if runtime.GOOS == "darwin" {
-		usr, _ := user.Current()
-		if usr.Uid != "0" {
-			sugar.Error("Must run as root")
+	if runtime.GOOS != "darwin" {
+		return
+	}
+
+	if os.Geteuid() != 0 {
+		exePath, err := os.Executable()
+		if err != nil {
 			return
 		}
 
+		out, err := exec.Command("sudo", "-E", exePath, "reconfigure-nfs").CombinedOutput()
+		if err != nil {
+			sugar.Error("Error ", out)
+			return
+		}
+		//sugar.Info(string(out))
+	} else {
 		running, param, err := CheckProcessRunning("nfsd")
 		if err != nil {
 			sugar.Error(err)

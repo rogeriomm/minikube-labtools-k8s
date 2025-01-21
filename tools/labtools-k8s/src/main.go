@@ -25,8 +25,8 @@ const Cluster2SvcSubnet = "10.96.0.0/12"
 
 const ClustersDomain = "xpt"
 
-const KubernetesVersion1 = "1.28.1"
-const KubernetesVersion2 = "1.28.1"
+const KubernetesVersion1 = "1.28.3"
+const KubernetesVersion2 = "1.28.3"
 
 var kub1 = k8s{ctx: Cluster1}
 var kub2 = k8s{ctx: Cluster2}
@@ -79,7 +79,7 @@ func configureClusters() {
 		sugar.Fatal(err)
 	}
 
-	err = kub2.ctl("apply", "-f", minikubeK8sPath+"/install/scripts/yaml2/")
+	err = kub2.ctl("apply", "-f", minikubeK8sPath+"/install/scripts/cluster2/")
 
 	if err != nil {
 		sugar.Fatal(err)
@@ -87,7 +87,7 @@ func configureClusters() {
 
 	kub1.useContext()
 
-	err = kub1.ctl("apply", "-f", minikubeK8sPath+"/install/scripts/yaml1/")
+	err = kub1.ctl("apply", "-f", minikubeK8sPath+"/install/scripts/cluster1")
 
 	if err != nil {
 		sugar.Fatal(err)
@@ -368,6 +368,8 @@ func installNfsProvisioner() {
 }
 
 func initializeClusters() {
+	nfsServer.reconfigure()
+
 	// Sync files into minikube: https://minikube.sigs.k8s.io/docs/handbook/filesync/
 	err := cp.Copy(minikubeK8sPath+"/install/scripts/files",
 		minikubeHomePath+"/files")
@@ -424,6 +426,8 @@ func setupK8sRegistry() {
 }
 
 func startClusters() {
+	nfsServer.reconfigure()
+
 	mkb1.start()
 	mkb2.start()
 
