@@ -37,8 +37,11 @@ func minikubeGetIp(name string) string {
 	return string(out)
 }
 
+/*
+netstat -anr -f inet
+*/
 func addIpRoute(subnet string, gateway string) {
-	_, err := exec.Command("sudo", "route", "-n", "delete", subnet, gateway).Output()
+	_, err := exec.Command("sudo", "route", "-n", "delete", subnet).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
