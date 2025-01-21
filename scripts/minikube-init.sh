@@ -49,8 +49,16 @@ argocd_setup()
 argocd_show_password()
 {
   kubectx cluster2
-  echo "ARGOCD admin password:"
+
+  while : ; do
+    kubectl -n argocd get secret/argocd-initial-admin-secret 2> /dev/null > /dev/null && break
+    sleep 5
+  done
+  set +x
+  echo -n "ARGOCD admin password: "
   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+  echo ""
+  set -x
 }
 
 internal_registry_setup()
