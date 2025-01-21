@@ -14,7 +14,7 @@
 # Install
 ## Install packages on MAC OS
 ```commandline
-brew install zsh minikube helm go kustomize
+brew install zsh minikube helm go kustomize cfssl
 ```
    * Optional
 ```commandline
@@ -99,6 +99,9 @@ tail -f /usr/local/var/log/named/named.log
 scutil --dns
 ```
 
+# Minikube ingress
+![alt text](docs/IngressDiagram.png "Title")
+
 # Post install checklist
 ## *.cluster.local dns lookups and service/pods connection on host
 ```commandline
@@ -128,10 +131,35 @@ minikube ip
 ping anything.worldl.xpt
 ```
 
+# Minikube Ingress TLS certificate
+```commandline
+kubectl -n kube-system create secret tls mkcert --key $MINIKUBE_HOME/key.pem --cert $MINIKUBE_HOME/cert.pem
+```
+
+```commandline
+minikube addons configure ingress
+```
+```commandline
+minikube addons disable ingress
+minikube addons enable ingress
+```
+
+  * Verify if custom certificate was enabled
+```commandline
+kubectl -n ingress-nginx get deployment ingress-nginx-controller -o yaml | grep "kube-system"
+```
+
+   * https://minikube.sigs.k8s.io/docs/tutorials/custom_cert_ingress/: How to use custom TLS certificate with ingress addon
+
+# See also
+   * [Certificates](docs/Certificates.md)
+   * [Jetbrains](docs/Jetbrains.md)
+
 # References
    * https://argo-cd.readthedocs.io/en/stable/getting_started/
    * https://rancher.com/docs/rancher/v2.5/en/installation/install-rancher-on-k8s
    * https://www.youtube.com/watch?v=_pUXOn_VRdQ: Nginx Ingress Controller Minikube with dnsmasq
    * https://gist.github.com/davebarnwell/c408533d608bfe24f4f5: Install dnsmasq and configure for *.dev.local domains
    * https://gist.github.com/loa/a88803c5678381eb515ab7f1241199a3: Minikube host networking integration
-   * https://kubernetes.io/docs/concepts/storage/volumes/#local: 
+   * https://kubernetes.io/docs/concepts/storage/volumes/#local:
+   * https://vocon-it.com/2018/12/31/kubernetes-6-https-applications-via-ingress-controller-on-minikube/: Kubernetes (6) – HTTPS Applications via Ingress Controller on Minikube 
