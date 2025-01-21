@@ -36,7 +36,8 @@ def minikube_get_sshkey(node: str, profile=None) -> str:
 
 
 def minikube_get_ingress_node() -> str:
-    cmd = "kubectl get pod -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx -l app.kubernetes.io/component=controller -o=jsonpath='{.items[0].spec.nodeName}'"
+    cmd = "kubectl get pod -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx " + \
+          "-l app.kubernetes.io/component=controller -o=jsonpath='{.items[0].spec.nodeName}'"
     stream = os.popen(cmd)
     return stream.read()
 
@@ -101,6 +102,15 @@ def main() -> int:
         minikube_cmd("cluster2", "ssh \"chmod +x init.sh\"")
         minikube_cmd("cluster2-m02", "ssh \"chmod +x init.sh\"")
 
+        if os.path.isfile("values.conf"):
+            scp(minikube_ip1, sshkey1, "values.conf")
+            scp(minikube_ip2, sshkey2, "values.conf")
+
+        # Execute initialization script on minikube nodes
+        console.print("Running init script on nodes...")
+        minikube_cmd("cluster2", "ssh \"sudo ./init.sh\"", is_print=True)
+        minikube_cmd("cluster2-m02", "ssh \"sudo ./init.sh\"", is_print=True)
+
     ingress_node = minikube_get_ingress_node()
 
     console.print(f"Ingress node: {ingress_node}")
@@ -110,11 +120,8 @@ def main() -> int:
         console.print("Minikube installation failed: update hosts", style="error")
         return 1
 
-    # Execute initialization script on minikube nodes
-    minikube_cmd("cluster2", "ssh \"sudo ./init.sh\"", is_print=True)
-    minikube_cmd("cluster2-m02", "ssh \"sudo ./init.sh\"", is_print=True)
-
     return 0
+
 
 if __name__ == "__main__":
     exit(main())
