@@ -3,10 +3,10 @@
 add_cert()
 {
   echo "Jetbrains: $1"
-  cd "/Applications/$1/Contents/jbr/Contents/Home/lib/security"
+  cd "/Applications/$1/Contents/jbr/Contents/Home/lib/security" || exit
 
   "/Applications/$1/Contents/jbr/Contents/Home/bin/keytool" -keystore cacerts \
-            -importcert -alias minikube-cert -file $MINIKUBE_HOME/ca.crt
+            -importcert -alias minikube-cert -file "$MINIKUBE_HOME"/ca.crt
 }
 
 echo "Adding Minikube certificate on all Jetbrains tools. Enter password 'changeit'"
