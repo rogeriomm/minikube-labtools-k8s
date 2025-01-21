@@ -119,8 +119,13 @@ def main() -> int:
     with open('/usr/local/etc/dnsmasq.d/worldl.xpt.conf', 'w') as f:
         f.write(f"address=/.worldl.xpt/{minikube_ip_ingress}")
 
+    # Setup resolver to use Dnsmasq local dns server for all *.worldl.xpt ingress lookups
     with open('/etc/resolver/worldl.xpt', 'w') as f:
         f.write("nameserver 127.0.0.1")
+
+    # Setup resolver to use Kubernetes dns server for all *.cluster.local lookups
+    with open('/etc/resolver/cluster.local', 'w') as f:
+        f.write("nameserver 10.96.0.10")
 
     with open('/usr/local/etc/dnsmasq.conf', 'w') as f:
         f.write("listen-address=0.0.0.0")
@@ -128,6 +133,9 @@ def main() -> int:
     # Reload Dnsmasqd configuration and clear cache
     assert os.system("sudo brew services restart dnsmasq") == 0
     assert os.system("dscacheutil -flushcache") == 0
+
+    # Host integration
+    assert os.system("route -n add 10.0.0.0/8 $(minikube ip)") == 0  # Pods, services
 
     return 0
 
