@@ -15,5 +15,6 @@ cd install/scripts
 
    * Add Minikube CA certificate using Jetbrains GUI "Preferences/Tools/Server Certificates"
       * Certificate located on "$MINIKUBE_HOME/ca.crt" or repository "install/scripts/minikube-certs/ca.crt" 
+      * Double-click on certificate file "ca.crt"
 
 <img src="JetbrainsCertificate.png" width="800">
