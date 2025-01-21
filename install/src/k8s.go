@@ -6,6 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"log"
@@ -13,23 +14,54 @@ import (
 )
 
 type k8s struct {
-	core v1.CoreV1Interface
+	core   v1.CoreV1Interface
+	config string // FIXME remove
 }
 
-func (k *k8s) kubecfg() {
+/*
+https://github.com/kubernetes/client-go/issues/192
+*/
+func buildConfigFromFlags(context, kubeconfigPath string) (*rest.Config, error) {
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfigPath},
+		&clientcmd.ConfigOverrides{
+			CurrentContext: context,
+		}).ClientConfig()
+}
+
+func buildConfigOverrideFlags(context string) (*rest.Config, error) {
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{},
+		&clientcmd.ConfigOverrides{
+			CurrentContext: context,
+		}).ClientConfig()
+}
+
+func (k *k8s) kubecfg(ctx string) {
 	var kubeconfig *string
+	var config *rest.Config
+	var err error
 
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"),
-			"(optional) absolute path to the kubeconfig file")
+	if k.core == nil {
+		if home := homedir.HomeDir(); home != "" {
+			kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"),
+				"(optional) absolute path to the kubeconfig file")
+		} else {
+			kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+		}
+		//flag.Parse()
+
+		k.config = *kubeconfig
+
+		config, err = buildConfigFromFlags(ctx, *kubeconfig)
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		log.Fatal(err)
+		config, err = buildConfigFromFlags(ctx, k.config)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
