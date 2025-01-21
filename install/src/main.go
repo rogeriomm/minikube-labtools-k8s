@@ -4,165 +4,14 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"flag"
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"regexp"
 	"strconv"
 )
-
-type Bind9 struct {
-	f *os.File
-}
-
-func (bind *Bind9) open() {
-	var err error
-	bind.f, err = os.OpenFile("/usr/local/etc/bind/zones/db.worldl.xpt", os.O_APPEND|os.O_RDWR, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (bind *Bind9) close() {
-	bind.f.Close()
-}
-
-func (bind *Bind9) findBindZone(key string) bool {
-	scanner := bufio.NewScanner(bind.f)
-	r, err := regexp.Compile(key)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for scanner.Scan() {
-		if r.MatchString(scanner.Text()) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (bind *Bind9) updateK8sIngress(ip string) {
-	bind.open()
-	defer bind.close()
-	found := bind.findBindZone("\\$INCLUDE /usr/local/etc/bind/zones/ingress-k8s.worldl.xpt")
-	if !found {
-		if _, err := bind.f.WriteString("$INCLUDE /usr/local/etc/bind/zones/ingress-k8s.worldl.xpt\n"); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	f, err := os.OpenFile("/usr/local/etc/bind/zones/ingress-k8s.worldl.xpt", os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	f.WriteString("*.worldl.xpt. IN A " + ip + "\n")
-	f.Close()
-}
-
-func (bind *Bind9) updateResolver(subDomain string, ip string) {
-	bind.open()
-	defer bind.close()
-	subDomainFile := "/usr/local/etc/bind/zones/" + subDomain + ".worldl.xpt"
-	found := bind.findBindZone("\\$INCLUDE " + subDomainFile)
-	if !found {
-		if _, err := bind.f.WriteString("$INCLUDE " + subDomainFile + "\n"); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	f, err := os.OpenFile(subDomainFile, os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	f.WriteString("*." + subDomain + ".worldl.xpt. IN A " + ip + "\n")
-	f.WriteString(subDomain + ".worldl.xpt. IN A " + ip + "\n")
-	f.Close()
-}
-
-type k8s struct {
-	core v1.CoreV1Interface
-}
-
-func (k *k8s) kubecfg() {
-	var kubeconfig *string
-
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"),
-			"(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		panic(err)
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-
-	k.core = clientset.CoreV1()
-}
-
-func (k *k8s) getNodeIngress() string {
-	pod := k.core.Pods("ingress-nginx")
-	opts := metav1.ListOptions{
-		LabelSelector: "app.kubernetes.io/name=ingress-nginx",
-	}
-
-	p, err := pod.List(context.TODO(), opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return p.Items[0].Spec.NodeName
-}
-
-func (k *k8s) getIngressMinikube() string {
-	node := k.getNodeIngress()
-
-	n, err := k.core.Nodes().Get(context.TODO(), node, metav1.GetOptions{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ip := n.Status.Addresses[0].Address
-
-	return ip
-}
-
-func (k *k8s) getSvcIp(namespace string, name string) string {
-	svc, err := k.core.Services(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return svc.Spec.ClusterIP
-}
-
-func restartBind() {
-	log.Println("Restarting BIND...")
-	_, err := exec.Command("sudo", "brew", "services", "restart", "bind").Output()
-	//log.Println(string(out))
-	if err != nil {
-		log.Fatal(err)
-	}
-}
 
 func flushDnsCache() {
 	log.Println("Flushing host DNS cache...")
@@ -171,42 +20,6 @@ func flushDnsCache() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func minikubeSsh(node string, parms string) {
-	out, err := exec.Command("minikube", "--node="+node, "ssh", parms).Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(out) == 0 {
-		return
-	}
-	fmt.Println(string(out))
-}
-
-func minikubeSetProfile(name string) {
-	_, err := exec.Command("minikube", "profile", name).Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func minikubeGetMainIp() string {
-	out, err := exec.Command("minikube", "ip").Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(out)
-}
-
-func minikubeAddIpRoute() {
-	ip := minikubeGetMainIp()
-
-	out, err := exec.Command("sudo", "route", "-n", "add", "10.0.0.0/8", ip).Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(out))
 }
 
 func sudoValidateUser() {
@@ -247,6 +60,7 @@ func configure() {
 		pv++
 		minikubeSsh(node.Name, "sudo mkdir -p /data/local-storage/pv000"+strconv.FormatInt(pv, 10))
 		pv++
+		minikubeSsh(node.Name, "sudo mkdir -p /data/standard-storage")
 	}
 
 	minikubeSetProfile("cluster2")
@@ -254,24 +68,42 @@ func configure() {
 	log.Println("Add Minikube IP route")
 	minikubeAddIpRoute()
 
-	restartBind()
+	bind.restartBind()
 	flushDnsCache()
 }
 
-func setIngress(namespace string, svc string, subDomain string) {
+func setIngress(argv []string) {
+	if len(argv) != 3 {
+		fmt.Println(len(argv))
+		log.Fatal("Invalid argument")
+	}
+
 	k8s := k8s{}
 	bind := Bind9{}
 
 	k8s.kubecfg()
 
+	namespace := argv[0]
+	svc := argv[1]
+	subDomain := argv[2]
+
 	log.Printf("Set ingress on service %s/%s, subdomain %s", namespace, svc, subDomain)
 	sudoValidateUser()
 	ip := k8s.getSvcIp(namespace, svc)
-	log.Printf("Update Bind to resolve *.%s.worldl.xpt to service %s/%s ip %s", subDomain, namespace, svc, ip)
+	log.Printf("Update Bind to resolve \"*.%s.worldl.xpt\" and \"%s.worldl.xpt\""+
+		" to service \"%s/%s ip %s\"",
+		subDomain, subDomain, namespace, svc, ip)
 	bind.updateResolver(subDomain, ip)
 
-	restartBind()
+	bind.restartBind()
 	flushDnsCache()
+}
+
+func help() {
+	fmt.Println("Minikube lab tool")
+	fmt.Println("Commands:")
+	fmt.Println("   configure      Configure")
+	fmt.Println("   set-ingress    Set K8S ingress")
 }
 
 func main() {
@@ -279,19 +111,17 @@ func main() {
 	args := os.Args[1:]
 
 	if len(args) < 1 {
-		log.Println("Invalid argument")
+		help()
 		return
 	}
 
-	if args[0] == "configure" {
+	switch args[0] {
+	case "configure":
 		configure()
-	} else if args[0] == "set-ingress" {
-		if len(args) != 4 {
-			fmt.Println(len(args))
-			log.Fatal("Invalid argument")
-		}
-		setIngress(args[1], args[2], args[3])
-	} else {
-		log.Fatal("Invalid argument")
+	case "set-ingress":
+		setIngress(args[1:])
+	default:
+		log.Fatal("Invalid command: " + args[0])
+		help()
 	}
 }

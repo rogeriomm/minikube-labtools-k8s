@@ -1,4 +1,4 @@
-module labtools-k8s/minikube-labtools-k8s-install
+module labtools-k8s/minikube-labtools-k8s
 
 go 1.17
 
