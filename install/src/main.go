@@ -1,5 +1,4 @@
 /*
-
  */
 package main
 
@@ -114,11 +113,40 @@ func setIngress(argv []string) {
 	flushDnsCache()
 }
 
+func cleanAvailablePv() {
+	k8s := k8s{}
+	k8s.kubecfg()
+
+	pvList, err := k8s.core.PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, pv := range pvList.Items {
+		if pv.Status.Phase == "Available" &&
+			pv.Spec.StorageClassName == "standard" &&
+			*pv.Spec.VolumeMode == "Filesystem" {
+
+			// FIXME check array size
+			operator := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Operator
+			node := pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Values[0]
+			name := pv.Name
+			path := pv.Spec.Local.Path
+
+			if operator == "In" {
+				println("Cleanning node:", node, " pv:", name, " path:", path)
+				minikubeSsh(node, "cd "+path+" && ls -A1 | xargs rm -rf")
+			}
+		}
+	}
+}
+
 func help() {
 	fmt.Println("Minikube lab tool")
 	fmt.Println("Commands:")
 	fmt.Println("   configure      Configure")
 	fmt.Println("   set-ingress    Set K8S ingress")
+	fmt.Println("   clean-available-pv    Clean available pv")
 }
 
 func gen_man() {
@@ -138,7 +166,6 @@ func gen_man() {
 }
 
 func main() {
-
 	log.Println("Minikube lab tool")
 
 	if runtime.GOOS != "darwin" {
@@ -157,6 +184,8 @@ func main() {
 		configure()
 	case "set-ingress":
 		setIngress(args[1:])
+	case "clean-available-pv":
+		cleanAvailablePv()
 	default:
 		log.Fatal("Invalid command: " + args[0])
 		help()

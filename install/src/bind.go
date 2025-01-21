@@ -76,8 +76,10 @@ func (bind *Bind9) updateResolver(subDomain string, ip string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	f.WriteString("*." + subDomain + ".worldl.xpt. IN A " + ip + "\n")
-	f.WriteString(subDomain + ".worldl.xpt. IN A " + ip + "\n")
+	f.WriteString("*." + subDomain + ".worldl.xpt. IN A " + ip)
+	f.WriteString("\n")
+	f.WriteString(subDomain + ".worldl.xpt. IN A " + ip)
+	f.WriteString("\n")
 	f.Close()
 }
 
