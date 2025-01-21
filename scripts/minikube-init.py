@@ -34,6 +34,11 @@ def minikube_get_sshkey(node: str, profile=None) -> str:
     return key
 
 
+def minikube_get_ingress_node() -> str:
+    cmd = "kubectl get pod -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx -l app.kubernetes.io/component=controller -o=jsonpath='{.items[0].spec.nodeName}'"
+    stream = os.popen(cmd)
+    return stream.read()
+
 def minikube_set_profile(profile: str):
     stream = os.popen(f"minikube profile {profile}")
     print(stream.read(), end='')
@@ -70,17 +75,21 @@ def main():
     custom_theme = Theme({"success": "green", "error": "bold red"})
     console = Console(theme=custom_theme)
 
+    console.print(":ok: Post installation...")
+
     minikube_set_profile("cluster2")
     minikube_ip1 = minikube_get_ip("cluster2")
     minikube_ip2 = minikube_get_ip("cluster2-m02")
     sshkey1 = minikube_get_sshkey("cluster2")
     sshkey2 = minikube_get_sshkey("cluster2-m02")
 
+    console.print(f"Minikube cluster2 ip: {minikube_ip1} {minikube_ip2}")
+
     if minikube_ip1 is None or \
        minikube_ip2 is None or \
        sshkey1 is None or \
        sshkey2 is None:
-        print("Minikube installation failed: invalid minikube ip/ssh-key")
+        console.print("Minikube installation failed: invalid minikube ip/ssh-key", style="error")
         return
 
     # Copy initialization script to minikube nodes
@@ -89,13 +98,19 @@ def main():
     minikube_cmd("cluster2", "ssh \"chmod +x init.sh\"")
     minikube_cmd("cluster2-m02", "ssh \"chmod +x init.sh\"")
 
-    if not update_host(minikube_ip2, 'argocd.world.xpt'):
-        print("Minikube installation failed: update hosts")
+    ingress_node = minikube_get_ingress_node()
+
+    console.print(f"Ingress node: {ingress_node}")
+    minikube_ip_ingress = minikube_get_ip(ingress_node)
+
+    if not update_host(minikube_ip_ingress, 'argocd.world.xpt'):
+        console.print("Minikube installation failed: update hosts", style="error")
         return
 
     # Execute initialization script on minikube nodes
     minikube_cmd("cluster2",     "ssh \"sudo ./init.sh\"", is_print=True)
     minikube_cmd("cluster2-m02", "ssh \"sudo ./init.sh\"", is_print=True)
+
 
 if __name__ == "__main__":
     main()
