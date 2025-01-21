@@ -681,3 +681,95 @@ spec:
               operator: In
               values:
                 - cluster2-m04
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0021
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard-consumer
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0021
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0022
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard-consumer
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0022
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m02
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0023
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard-consumer
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0023
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m03
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: standard-storage-pv0024
+spec:
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard-consumer
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /data/standard-storage/pv0024
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - cluster2-m04
