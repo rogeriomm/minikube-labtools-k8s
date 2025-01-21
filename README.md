@@ -41,7 +41,11 @@ sudo nfsd restart
    * https://argocd.world.xpt
 
 # Rancher
+   * Disabled, waiting Kubernetes 1.22 compatibility for RANCHER 2.6
    * https://rancher.world.xpt
+
+# Kubernets dashboard
+   * https://dashboard.worldl.xpt/
 
 ## BIND
    * Restart service
