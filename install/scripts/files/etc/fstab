@@ -1,0 +1,15 @@
+# <file system> <mount pt>      <type>  <options>       <dump>  <pass>
+/dev/root       /               ext2    rw,noauto       0       1
+proc            /proc           proc    defaults        0       0
+devpts          /dev/pts        devpts  defaults,gid=5,mode=620 0       0
+sysfs           /sys            sysfs   defaults        0       0
+
+#
+# On MAC OS host,file /etc/exports add:
+# /Users/$USERNAME/git -maproot=$USERNAME -rw -network 192.168.64.0 -mask 255.255.255.0
+# /Volumes/data -maproot=$USERNAME -rw -network 192.168.64.0 -mask 255.255.255.0
+#
+# Restart nfs servcice "sudo nfsd restart"
+#
+host.minikube.internal:/Volumes/data /Volumes/data nfs defaults 0 0
+#
