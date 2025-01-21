@@ -5,7 +5,6 @@
       * Container registry
       * Local Docker, replace Docker Desktop
       * ArgoCD 
-      * RANCHER 2.6
 
    * Target OS
       * MACOS Ventura 
@@ -15,10 +14,6 @@
 ## Install packages on MACOS
 ```shell
 brew install zsh minikube helm go kustomize cfssl
-```
-   * Optional
-```shell
-brew install rancher-cli
 ```
 
 ## Setup network/firewal on MACOS
@@ -78,7 +73,7 @@ write(2, "More details here: https://curl."..., 264More details here: https://cu
 /Users/rogermm/nfs -alldirs -maproot=rogermm -network 192.168.64.0 -mask 255.255.255.0
 ```
 
-```commandline
+```commandlin
 sudo nfsd enable
 sudo nfsd checkexports
 sudo nfsd restart
