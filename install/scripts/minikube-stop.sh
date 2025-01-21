@@ -2,7 +2,6 @@
 
 source minikube-lib.sh
 
-rm -f "$MINIKUBE_HOME"/docker-env
+minikube_check_config
 
-minikube -p cluster stop 
-minikube -p cluster2 stop 
+clusters_stop

@@ -1,20 +1,28 @@
 # https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
 # brew install docker-credential-helper
 
-KUBERNETES_VERSION="1.22.13"
+KUBERNETES_VERSION="1.22.15"
 
 MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
 MINIKUBE_FILES=$MINIKUBE_HOME/files
 MINIKUBE_ETC=$MINIKUBE_FILES/etc
 #MINIKUBE_CERTS=$MINIKUBE_FILES/certs
 
+minikube_check_config()
+{
+  if [ ! -d "$MINIKUBE_HOME" ]; then
+    echo "Invalid Minikube home directory "
+    exit 1
+  fi
+}
+
 cluster1_create()
 {
   PROFILE=cluster
 
-  minikube -p $PROFILE config set cpus 14
+  minikube -p $PROFILE config set cpus 4
   minikube -p $PROFILE config set memory 16g
-  minikube -p $PROFILE config set disk-size 100g
+  minikube -p $PROFILE config set disk-size 130g
   minikube -p $PROFILE config view
 
   minikube -p $PROFILE start \
@@ -30,13 +38,14 @@ cluster2_create()
 {
   PROFILE=cluster2
 
-  minikube -p $PROFILE config set cpus 28
+  minikube -p $PROFILE config set cpus 22
   minikube -p $PROFILE config set memory 80g
   minikube -p $PROFILE config set disk-size 100g
   minikube -p $PROFILE config view
 
   minikube -p $PROFILE start \
            --kubernetes-version="v${KUBERNETES_VERSION}" \
+           --extra-config=kubelet.max-pods=100 \
            --nodes 3 --driver='hyperkit' --insecure-registry "192.168.64.0/24,10.0.0.0/8"
 
   minikube -p $PROFILE addons enable ingress
@@ -54,15 +63,22 @@ cluster2_create()
   cp minikube-certs/{ca.crt,ca.key,ca.pem,cert.pem,key.pem} "$MINIKUBE_HOME"
 }
 
+clusters_stop()
+{
+  rm -f "$MINIKUBE_HOME"/docker-env
+  minikube -p cluster stop
+  minikube -p cluster2 stop
+}
+
 clusters_start()
 {
   set -x
   set -e
 
-  ip="192.168.100.250" # FIXME
+  ip=$(ifconfig en0 | grep 'inet ' | awk '{print $2}')
 
   if ! dig @$ip www.google.com; then
-    echo "Local DNS server not working"
+    echo "Local DNS server isn't working. Verify your local DNS configuration"
     exit 1
   fi
 
@@ -82,6 +98,8 @@ clusters_post_start()
   argocd_show_password
 
   #rancher_show_password
+
+  kubectl get pv
 }
 
 minikube_get_host_ip()
