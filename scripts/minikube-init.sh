@@ -3,7 +3,11 @@
 # https://itnext.io/goodbye-docker-desktop-hello-minikube-3649f2a1c469
 # brew install docker-credential-helper
 
+# Last stable kuberbetes version supported by RANCHER 2.5
 KUBERNETES_VERSION="1.21.6"
+
+MINIKUBE_HOME="${MINIKUBE_HOME:-${HOME}/.minikube}"
+MINIKUBE_FILES=$MINIKUBE_HOME/files
 
 cluster1_create()
 {
@@ -60,7 +64,7 @@ argocd_show_password()
 
   while : ; do
     kubectl -n argocd get secret/argocd-initial-admin-secret 2> /dev/null > /dev/null && break
-    sleep 15
+    sleep 20
   done
   set +x
   echo -n "ARGOCD admin password: "
@@ -73,7 +77,7 @@ internal_registry_setup()
 {
   # Configure docker internal registry
   kubectx cluster # Our docker engine used by MAC OS
-  kubectl -n kube-system delete configmap registry-cluster
+  kubectl -n kube-system delete configmap registry-cluster || echo -n
   kubectl -n kube-system create configmap registry-cluster \
                   --from-literal=registryAliases=registry.minikube \
                   --from-literal=registryServiceHost=$(minikube -p cluster2 ip) # Internal registry
@@ -95,7 +99,7 @@ rancher_setup()
 
 rancher_show_password()
 {
-  echo "Rancher password: " -n
+  echo -n "Rancher password: "
   kubectl get secret --namespace cattle-system bootstrap-secret \
      -o go-template='{{.data.bootstrapPassword|base64decode}}{{"\n"}}'
 }
@@ -120,12 +124,7 @@ init()
 {
   echo "Installation..."
   set -x
-
-  if [ -z "$MINIKUBE_HOME" ]; then
-    MINIKUBE_HOME="$HOME/.minikube"
-  fi
-
-  MINIKUBE_FILES=$MINIKUBE_HOME/files
+  set -e
 
   # Delete all clusters
   minikube -p cluster delete
