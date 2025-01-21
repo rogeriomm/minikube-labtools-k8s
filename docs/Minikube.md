@@ -1,3 +1,7 @@
+# Optimizations
+   * https://github.com/kubernetes/minikube/issues/13620   
+      * **minikube start --driver docker --kubernetes-version=v1.21.2 --extra-config=kubelet.housekeeping-interval=10s** 
+
 # Host tunneling
    * /etc/pf.conf
 ```text
@@ -435,4 +439,81 @@ kube-dns.kube-system.svc.cluster2.xpt. 28 IN A  10.96.0.10
 ;; SERVER: 10.96.0.10#53(10.96.0.10) (UDP)
 ;; WHEN: Mon Feb 05 21:49:11 UTC 2024
 ;; MSG SIZE  rcvd: 131
+```
+
+# Enable macOS pf 
+   * Create a LaunchDaemon to Load PF Rules at Startup:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>org.user.pfctl</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/sbin/pfctl</string>
+    <string>-e</string> <!-- This enables pf -->
+    <string>-f</string> <!-- This specifies the pf.conf file to use -->
+    <string>/etc/pf.conf</string> <!-- Path to your pf.conf file -->
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+```
+
+   * Load and Start the LaunchDaemon:
+```shell
+sudo launchctl load /Library/LaunchDaemons/org.user.pfctl.plist
+```
+```shell
+sudo launchctl list | grep org.user.pfctl
+```
+ 
+   * Verify pf is Running:
+```shell
+sudo pfctl -s info
+sudo pfctl -sr
+```
+
+# macOS firewall
+```shell
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+```
+
+```shell
+sudo pfctl -s info
+```
+
+
+```shell
+sudo pfctl -f /etc/pf.conf
+```
+
+```shell
+sudo pfctl -e
+```
+
+# Containerd
+
+```shell
+sudo ctr namespaces list
+```
+
+```shell
+sudo ctr -n=k8s.io images ls
+```
+
+```shell
+minikube ssh sudo ctr -n=k8s.io images import ./command\:master.tar
+```
+
+```shell
+minikube ssh sudo ctr -n=k8s.io images push jfrog.worldl.xpt/lab/command:master
+```
+
+
+```shell
+ kubectl get nodes -o wide
 ```
