@@ -130,6 +130,8 @@ if [[ "$1" = "install" ]]; then
 elif [[ "$1" = "postinstall" ]]; then
   sudo echo
   post_init
+elif [[ "$1" = "argocd" ]]; then
+  argocd_show_password
 else
   echo "Invalid command"
 fi
