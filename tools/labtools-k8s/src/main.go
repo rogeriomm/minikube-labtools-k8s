@@ -262,7 +262,10 @@ func startCluster2() {
 		osStr = `--driver='docker' --container-runtime='containerd'`
 	}
 
+	//--disable-optimizations=true disables optimizations that are set for local Kubernetes.
+	//Including decreasing CoreDNS replicas from 2 to 1 and increasing kubeadm housekeeping-interval from 10s to 5m
 	cmd := `minikube -p ` + mkb2.profile + ` start
+    --disable-optimizations=true
 	--kubernetes-version="v` + KubernetesVersion2 + `" 
 	--dns-domain="` + mkb2.profile + `.` + ClustersDomain + `" 
     --extra-config=kubelet.system-reserved=cpu=500m,memory=500Mi 
@@ -303,6 +306,7 @@ func startCluster1() {
 	}
 
 	cmd := `minikube -p ` + mkb1.profile + ` start
+    --disable-optimizations=true
 	--kubernetes-version="v` + KubernetesVersion1 + `" 
 	--dns-domain="` + mkb1.profile + `.` + ClustersDomain + `" 
     --extra-config=kubelet.max-pods=250
