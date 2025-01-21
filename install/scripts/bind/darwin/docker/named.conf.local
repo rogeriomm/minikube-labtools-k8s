@@ -4,9 +4,3 @@ zone "worldl.xpt" in { // Domain name
     allow-update { none; }; // Primary DNS
 };
 
-zone "worldlb.xpt" in { // Domain name
-    type master; // Primary DNS
-    file "/usr/local/etc/bind/zones/db.worldlb.xpt"; // Forward lookup file
-    allow-update { none; }; // Primary DNS
-};
-
