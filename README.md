@@ -14,3 +14,13 @@
 # ArgoCD
    * https://argo-cd.readthedocs.io/en/stable/getting_started/
 
+   * https://argocd.world.xpt
+
+```commandline
+argocd login argocd.world.xpt:443
+```
+
+```commandline
+echo $(minikube -p cluster2 ip) argocd.world.xpt >> /etc/hosts
+echo $(minikube -p cluster2 ip) zeppelin.world.xpt >> /etc/hosts
+```
